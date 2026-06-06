@@ -1,0 +1,71 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "nextflow_schema.json",
+    "title": "Pipeline Parameters",
+    "type": "object",
+    "$defs": {
+
+        "common": {
+            "title": "Common",
+            "type": "object",
+            "properties": {
+                "outdir": {
+                    "type": "string",
+                    "description": "Directory for pipeline outputs",
+                    "default": "results"
+                },
+                "workflow": {
+                    "type": "string",
+                    "description": "Which workflow to run",
+                    "enum": ["benchmarking", "bootstrapping", "prelabelling"]
+                }
+            },
+            "required": ["workflow"]
+        },
+
+        "bootstrapping": {
+            "title": "Bootstrapping",
+            "type": "object",
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "description": "Path or glob to query files (.json or .jsonl)"
+                }
+            }
+        },
+
+        "benchmarking": {
+            "title": "Benchmarking",
+            "type": "object",
+            "properties": {
+                "queries": {
+                    "type": "string",
+                    "description": "Path or glob to query files"
+                },
+                "configs": {
+                    "type": "string",
+                    "description": "Path to directory containing archi configs"
+                }
+            }
+        }
+    },
+
+    "allOf": [
+        { "$ref": "#/$defs/common" },
+        { "$ref": "#/$defs/bootstrapping" },
+        { "$ref": "#/$defs/benchmarking" },
+
+        {
+            "if":   { "properties": { "workflow": { "const": "bootstrapping" } } },
+            "then": { "required": ["input"] }
+        },
+        {
+            "if":   { "properties": { "workflow": { "const": "benchmarking" } } },
+            "then": { "required": ["queries", "configs"] }
+        },
+        {
+            "if":   { "properties": { "workflow": { "const": "prelabelling" } } },
+            "then": { "required": ["input"] }
+        }
+    ]
+}

@@ -1,0 +1,182 @@
+[
+  {
+    "question": "I need to use a (old ?) CMSSW release where CRAB client fails, what can I do ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#I_need_to_use_a_old_CMSSW_releas"
+    ],
+    "answer": "CRAB is currently tested and compatible with any SL7 CMSSW release: CMSSW_8,9,10,11,12 It is possible to use CRAB for SL6 releases CMSSW_7_x using CMSSW singularity/apptainer container cmssw_cc6 There is an important caveat though: the CMS SL6 container does not have the myproxy-* commands, therefore from there crab commands can not create the long lived credential in myproxy.cern.ch needed to run a CRAB tasks , nor verify it therefore if you need to use CRAB on SL6, you need to: take care of my...",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Can I use CRAB to process data described only as a Rucio container ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Can_I_use_CRAB_to_process_data_d"
+    ],
+    "answer": "Yes. You can indicate a Rucio DID ( scope:containerName ) as input to a CRAB job in the Data.inputDataset configuration parameter: config.JobType.inputDataset = 'user.belforte:/GenericTTbar/belforte-crab_20230306_162534-94ba0e06145abd65ccb1d21786dc7e1d/USER' Important Notes: This feature is meant to address the use case of dataset produced by previous CRAB tasks, but not saved in DBS or files simply placed in /store/user/username/...",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "My dataset is (partially) on tape (and partially on disk), how can I process it with CRAB?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#My_dataset_is_partially_on_tape"
+    ],
+    "answer": "When the input dataset is not fully on disk, CRAB automatically creates Rucio's rule to CMSRucio to copy data from the tape site to any site with available disk space. CRAB task status will change from NEW to TAPERECALL . Every 4 hour, CRAB pickup TAPERECALL task and check Rucio's rules. If the rule changes state from REPLICATING to OK , CRAB will change the task status back to NEW , waiting for the main thread to process it like the usual tasks. We call this procedure \"automatic tape recall\" .",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Can I delete a dataset I published in DBS?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Can_I_delete_a_dataset_I_publish"
+    ],
+    "answer": "Users do not have permissions to delete a dataset or a file from DBS. Instead, what users can do is to change the status of the dataset or of individual files in the dataset. For more details see Changing a dataset or file status in DBS .",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Can I send CRAB output to CERNBOX ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Can_I_send_CRAB_output_to_CERNBO"
+    ],
+    "answer": "Yes, by simply indicating T3_CH_CERNBOX as storage location in CRAB configuration Be aware that CERNBOX is a service offered by CERN, not CMS. CMS simply offers a way for CRAB users to send CRAB output data to their CERNBOX disk space via the T3_CH_CERNBOX site name NOTE : since CERNBOX is NOT a CMS storage, files in there can not be listed in global DBS nor moved with Rucio, nor transparently accessed by grid jobs, nor accessed via CRAB.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Can I register CRAB output in Rucio ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Can_I_register_CRAB_output_in_Ru"
+    ],
+    "answer": "Yes. But you need to configure this before submitting. See CrabASOwithRucio",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Can I register in Rucio an existing USER dataset ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Can_I_register_in_Rucio_an_exist"
+    ],
+    "answer": "Yes, so you can then user Rucio to manage the data (replication, deletion...) but the dataset needs to be moved to a disk location owned by Rucio /cms/store/user/rucio/someusername and you need to have Rucio quota on the Rucio Storage Element (RSE) where you want the data to be.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Recovery task: How",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Recovery_task_How"
+    ],
+    "answer": "You must of course have around the original scram project area crab configuration file including the pset and any other file referenced in there original CRAB project directory if you did not publish output in DBS The procedure to generate a recovery task is based on these simple steps: issue a crab kill .",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Dealing with a growing input dataset and/or changing lumi-mask",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Dealing_with_a_growing_input_dat"
+    ],
+    "answer": "While data taking is progressing, corresponding datasets in DBS and lumi-mask files are growing. Also data quality is sometimes improved for already existing data, leading to updated lumi-masks which compared to older lumi-masks include luminosity sections that were previously filtered out.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Using pile-up",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Using_pile_up"
+    ],
+    "answer": "Important Instructions: Make sure you run your jobs at the site where the pile-up sample is. Not where the signal is. This requires you to overrdie the location list that CRAB would extract from the inputDataset . Rational and details: The pile-up files have be specified in the CMSSW parameter-set configuration file. There is no way yet to tell in the CRAB configuration file that one wants to use a pile-up dataset as a secondary input dataset.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "How can I tell CRAB to run jobs on a GPU ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_can_I_tell_CRAB_to_run_jobs"
+    ],
+    "answer": "If your code can make use of a GPU coprocessor you can tell CRAB to add the requirement that jobs in your task run on cores which have a GPU available. Of course this will be ANDed with any other requirement on data, memory, number of cores, time etc. This is done by adding in crab configuration file: config.section_(\"Site\") config.Site.requireAccelerator = True You can view the site and available GPU from CMS Submission Infrastructure: GPUs monitor dashboard.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "How can I use CRAB to submit to my local batch system",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_can_I_use_CRAB_to_submit_to"
+    ],
+    "answer": "CRAB3 only support submission to the CMS global pool, an HTCondor pool comprised of glideinWms pilots running on distributed grid sites. But it is possible to use CRAB machinery for data discovery, job splitting, and job preparation (i.e. configure a set of jobs to be executed to process a given input dataset) and execute those jobs locally, interactively or in users preferred batch system.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "How to predict how long my jobs will run for?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_to_predict_how_long_my_jobs"
+    ],
+    "answer": "Use the --dryrun option when doing crab submit . See crab submit --dryrun .",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "What do I do if my task can not complete in 30 days",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#What_do_I_do_if_my_task_can_not"
+    ],
+    "answer": "If things are not done by than, changes are that somehting in the task submission was wrong or jobs critically depend on one particular site and that is down or overfull. In any case usually after a week or so every job in the task was submitted at least once. Better to stop, take stock of the available output, review things and submit a new task for the remaining data, possibly improving something.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "How to list/copy/remove files/directories in a storage element area?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_to_list_copy_remove_files_di"
+    ],
+    "answer": "You can use the gfal-* commands from a machine that has GFAL2 utility tools installed (e.g. lxplus). You have to pass Physical File Names (PFNs) as arguments to the commands. To get the Physical File Name given a Logical File Name and a CMS node name, you can use the lfn2pfn PhEDEx API. LFNs are names like /store/user/mario/myoutput ; note that a directory is also a file name.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Doing lumi-mask arithmetics",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Doing_lumi_mask_arithmetics"
+    ],
+    "answer": "There is a tool written in python called LumiList.py (available in the WMCore library ; is the same code as cmssw/FWCore/PythonUtilities/python/LumiList.py ) that can be used to do lumi-mask arithmetics. The arithmetics can even be done inside the CRAB configuration file (that's the advantage of having the configuration file written in python). Below are some examples. Example 1 : A run range selection can be achieved by selecting from the original lumi-mask file the run range of interest.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "How can I tell CRAB to run jobs on a non-x86 worker node ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_can_I_tell_CRAB_to_run_j_AN1"
+    ],
+    "answer": "Quick instructions for running the jobs of a task on ARM nodes, if they are available on the global pool: login into lxplus8-arm.cern.ch or lxplus9-arm.cern.ch if you want or need, start a singularity container with /cvmfs/cms.cern.ch/common/cmssw-elX then run the usual commands: cmsrel , cmsenv , scrab b , crab submit . This is because at the moment, CRAB support for non-x86 architectures has the following limitations: a task can target a single architecture.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab-env-bootstrap.shscript to overcome the CRAB3 and CMSSW environment conflicts",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_env_bootstrap_sh_script_to"
+    ],
+    "answer": "To overcome the CRAB3 vs CMSSW environment conflicts, you can use the following script available in CVMFS ( /cvmfs/cms.cern.ch/crab3/crab-env-bootstrap.sh ) without need to source the CRAB3 environment. You could do something like this: cmsenv # DO NOT setup the CRAB3 environment alias crab='/cvmfs/cms.cern.ch/crab3/crab-env-bootstrap.sh' crab submit crab status ...",
+    "sources_match_field": [
+      "url"
+    ]
+  }
+]

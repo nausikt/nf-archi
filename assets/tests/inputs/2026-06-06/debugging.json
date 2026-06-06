@@ -1,0 +1,292 @@
+[
+  {
+    "question": "crab command fails with Impossible to retrieve proxy from myproxy.cern.ch ...",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_command_fails_with_Impossib"
+    ],
+    "answer": "This can be due to a stale credential in myproxy . CRAB client always tries to keep a valid one there, but there are some known edge cases where this fails, e.g. https://github.com/dmwm/CRABServer/issues/5168 . Therefore you should remove credentials from myproxy and then issue the crab commad again.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab commands fails with = Error Username Exception: Error contacting CRIC. =",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_commands_fails_with_Error_U"
+    ],
+    "answer": "In particular crab output contains something like this Error UsernameException: Error contacting CRIC. Details follow: Executed command: curl -sS --capath /etc/grid-security/certificates --cert /tmp/x509up_u8516 --key /tmp/x509up_u8516 'https://cms-cric.cern.ch/api/accounts/user/query/?json&preset=whoami' Stdout: Stderr: curl: (35) error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol version This is known to happen with CMSSW_7_* and very likley older releases as well both in ...",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Why is CRAB not transferring an output file?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Why_is_CRAB_not_transferring_an"
+    ],
+    "answer": "First of all, does CRAB know at all that the job should produce the output file in question? To check that, open one of the job log files linked from the task monitoring pages. Very close to the top it is printed the list of output files that CRAB expects to see once the job finishes (shown below is the case of job number 1 in the task): ======== HTCONDOR JOB SUMMARY at ... START ======== CRAB ID: 1 Execution site: ... Current hostname: ... Destination site: ...",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "My jobs are still idle/pending/queued. How can I know why and what can I do?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#My_jobs_are_still_idle_pending_q"
+    ],
+    "answer": "If jobs are pending for more than ~12 hours, there is certainly a problem somewhere. The first thing to do is to identify to which site(s) the jobs were submitted and check the site(s) status in the Site Readiness Monitor page, http://cms-site-readiness.web.cern.ch/cms-site-readiness/SiteReadiness/HTML/SiteReadinessReport.html .",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab status says that Task is FAILED w/o any other information",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_status_says_that_Task_is_FA"
+    ],
+    "answer": "This can happen when using Automatic Splitting if all of the probe jobs failed (see CRAB3FAQ#What_is_the_Automatic_splitting for a description of probe jobs). Example: CRAB project directory: /afs/cern.ch/work/b/belforte/CRAB3/TC3/dbg/zuolo/crab_TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_1 Task name: 190823_123943:dzuolo_crab_TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8_1 Grid scheduler - Task Worker: crab3@vocms0107.cern.ch - crab-prod-tw01 Status on the CRAB server: SUBMITTED Task URL to use for HELP: h...",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "When using automatic splitting all probe jobs failes with 50664 (time limit exceed)",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#When_using_automatic_splitting_a"
+    ],
+    "answer": "User configuration parameter have no effect on the time limit for probe jobs. The are always configured for terminating after 15min, but cmsRun can only stop on lumi boundaries. Probe jobs are allowed to run up to 1h, but if not even that is sufficient, they will fail as in example below. In this case you should avoid using Automatic Splitting and fall back to Lumiosity Splitting with a few lumis per job.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab checkusername fails with \"Error: Failed to retrieve username from CRIC.\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_checkusername_fails_with_Er"
+    ],
+    "answer": "OBSOLETE. Need to be modified for the new method based on CRIC crab checkusername uses the following sequence of bash commands, which you should try to execute one by one (make sure you have a valid proxy) to check if they return what is expected.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab submit fails with \"Task could not be submitted because there is no DISK replica\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_Task_coul"
+    ],
+    "answer": "jobs can only read data which is on DISK. Data which on Tape needs to be recalled and placed on disk first. If your desired input is on tape you have various options depending on the situation. First check with your Physics Group if that input is the correct one. At times a dataset has been replaced with a better version and if you point to the old one you will find that is on tape, while the new one is on disk.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab submit fails with \"User quota limit reached; cannot upload the file\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_User_quot"
+    ],
+    "answer": "When doing crab submit the user may get this error messages: Error contacting the server. Server answered with: Invalid input parameter Reason is: User quota limit reached; cannot upload the file Error explanation: The user has reached the limit of 4.88GB in its CRAB cache area. Read more in this FAQ . What to do: Files in the CRAB cache are automatically deleted after 5 days, but the user can clean his/her cache area at any time. See how in this FAQ .",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab (re)submit fails with \"Trapped exception in Dagman.Fork\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_re_submit_fails_with_Trappe"
+    ],
+    "answer": "Typical error in crab status : Failure message: The CRAB server backend was not able to (re)submit the task, because the Grid scheduler answered with an error. This is probably a temporary glitch. Please try again later. If the error persists send an e-mail to hn-cms-computing-tools@cern.ch<mailto:hn-cms-computing-tools@cern.ch>.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab submit fails with \"Task failed to bootstrap on schedd\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_Task_fail"
+    ],
+    "answer": "After doing crab submit and crab status the user may get this error message: Task status: UNKNOWN Error during task injection: Task failed to bootstrap on schedd Error explanation: The submission of the task to the scheduler machine has failed. What to do: Submit again.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab submit fails with \"Failed to contact Schedd\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_Failed_to"
+    ],
+    "answer": "When doing crab status the user may get one of these error messages: Error during task injection: <task-name>: Failed to contact Schedd: Failed to fetch ads from schedd. Error during task information retrieval: <task-name>: Failed to contact Schedd: . Error explanation: This is a temporary communication error with the scheduler machine (submission node), most probably because the scheduler is overloaded. What to do: Try again after a couple of minutes.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab submit fails with \"Splitting task ... on dataset ... with ... method does not generate any job\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_Splitting"
+    ],
+    "answer": "This is not a CRAB error. This usually happens when there is no lumi to process. I.e.the intersection of the input lumimask (if any) the selected run range (if any) the set of runs and lumis in the input dataset is empty. Typical reasons are using a golden json lumimask from some data acquisition era on data from a different era or looking for a specific run in a dataset which does not include that run.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab submit fails with \"Block ... contains more than 100000 lumis and cannot be processed for splitting. For memory/time contraint big blocks are not allowed. Use another dataset as input.\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_Block_con"
+    ],
+    "answer": "The message is self explaining. CRAB server will die due to lack of memory if it needs to process luminosity lists with millions of entries per block. This can only happen with MC datasets which have been created with improper use of lumisections, since the limit at 100k lumisection in one block would correspond for real data to 100 days of continuous data taking.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "crab submit fails with \"Block ... contains more than 100000 lumis.\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#crab_submit_fails_with_Block_AN1"
+    ],
+    "answer": "The message is self explaining. CRAB server will die due to lack of memory if it needs to process luminosity lists with millions of entries per block. There are two known cases where this can happen: MC datasets which have been created with improper use of lumisections. MC lumi sections have no relation with luminosity but are used only to allow processing less than a file in one job via split by lumi algorithm, in this case it makes no sense to have more lumis than events.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "CRAB fails to resubmit some jobs",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#CRAB_fails_to_resubmit_some_jobs"
+    ],
+    "answer": "It is important that you as a user are prepared for this to happen and know how to remain productive in your physics analysis with the least effort. While there is a long tradition of \"resubmit them until they work\", this is hardly useful any more. And while we can't prevent users from trying we can not guarantee that it will work, nor that resubmitted jobs will succeed.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "I get a \"Syntax error in CRAB configuration\"",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#I_get_a_Syntax_error_in_CRAB_con"
+    ],
+    "answer": "When doing crab submit the user may get one of these error messages: Syntax error in CRAB configuration: invalid syntax (<CRAB-configuration-file-name>.py, <line-where-error-occurred>) Syntax error in CRAB configuration: 'Configuration' object has no attribute '<attribute-name>' Error explanation: The CRAB configuration file could not be loaded, because there is a syntax error somewhere in it. What to do: Check the CRAB configuration file and fix it.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Problems with the = .requestcache file = and/or the CRAB project directory",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Problems_with_the_requestcache_f"
+    ],
+    "answer": "If a crab command fails with messages like \"Cannot find .requestcache file\" or \"... is not a valid CRAB project directory\" or otherwise complains that it can not find the tasks you are trying to send the command to, a problem with local directory where crab submit caches relevant information is likely (maybe disk got full, or corrupted, or you removed a file unintentionally).",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Jobs status changes back to idle (my jobs are being resubmitted)",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Jobs_status_changes_back_to_idle"
+    ],
+    "answer": "it means that jobs failed with a possibly transient error (like error opening a file) and CRAB is automatically resubmitting (up to 3 times). If problem persists and you want to reproduce it locally you must be sure to use exact same input file(s) as the failed job(s). Also check job stdout, maybe error only happens after some number of event(s) and/or file(s) are read. Please see: https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Troubleshoot",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Exit code 8001",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Exit_code_8001"
+    ],
+    "answer": "This indicate that cmsRun enconterred a bot better specified fatal exception. Usually means a problem in user code or configuration. You should inspect the stdout of one job to find the exception message and traceback which may guide you to the solution.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Exit code 8021",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Exit_code_8021"
+    ],
+    "answer": "cmsRun could opern the file, but found a problem with the content look in the job stdout for the exact error message, at times it may clearly indicate a mismatch in the objects requested by the code and present in the file, i.e same prolem as the one below if your job failed multiple times check whehter the file was always read from same site or not, this may help to tell file corruption (most likely it will affect only one replica) from software mismatch (will affect all replicas) make sure tha...",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Exit code 8028",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Exit_code_8028"
+    ],
+    "answer": "Normally this has same meaning as 8020: a needed file is not present at the site where it was expected to to be and the site needs to fix this. If the problem is reproducible after O(1 day) or is happening in large amount, write to the support list and it will be followed up. Only in the special cases in which you intentionally try to read files from a site different from the one where jobs run, more investigation and action are needed. In those cases, keep reading the details below.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Exit code 50660",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Exit_code_50660"
+    ],
+    "answer": "Exit code 50660 means \"Application terminated by wrapper because using too much RAM (RSS)\" (as documented here ). The amount of RAM that a job can use on a grid node is always limited and if memory need keeps increasing as the job run (so called \"memory leak\") the job will need to be killed. Grid sites used by CMS guarantee at least 2.5 GB of RAM per core, so allowing for some overhead, CRAB default is to ask 2GB per job.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Illegal parameter found in configuration. The parameter is named: 'number Events In Luminosity Block'",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Illegal_parameter_found_in_confi"
+    ],
+    "answer": "The most common reasons for this error are: The user is trying to analyze an input dataset, but he/she has specified in the CRAB configuration file JobType.pluginName = 'PrivateMC' instead of JobType.pluginName = 'Analysis' . The user is generating MC events, correctly specifying in the CRAB configuration file JobType.pluginName = 'PrivateMC' , but in the CMSSW parameter set configuration he/she has specified a source of type PoolSource . The solution is to not specify a PoolSource .",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Segmentation Fault (exit code 11 or 139)",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Segmentation_Fault_exit_code_11"
+    ],
+    "answer": "Usually segmentation faults are well reproducible and can be debugged by running locally on same input files as the CRAB job (e.g. via using [[https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3Commands#crab_preparelocal][crab preparelocal]). Here's some general hint on how to tackle them from https://hypernews.cern.ch/HyperNews/CMS/get/computing-tools/5166/2.html : A segfault is typically caused by invalid memory access (e.g.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "[ERROR] Operation expired",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#ERROR_Operation_expired"
+    ],
+    "answer": "Some sites configuration can not handle remote access of large files (> 10 GB) and XRootD fails with a message like == CMSSW: [1] Reading branch EventAuxiliary == CMSSW: [2] Calling XrdFile::readv() == CMSSW: Additional Info: [a] Original error: '[ERROR] Operation expired' (errno=0, code=206, source=xrootd.echo.stfc.ac.uk:1094 (site T1_UK_RAL)). As of winter 2019 this almost only happens for files stored at T1_UK_RAL.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Multiple submission fails with a CMSSW \"duplicate process\" or \"A different CMSSSW configuration was already cached\" error",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Multiple_submission_fails_with_a"
+    ],
+    "answer": "The general problem is that CMSSW parameter-set configurations don't like to be loaded twice. In that respect, each time the CRAB client loads a CMSSW configuration, it saves it in a local (temporary) cache identifying the loaded module with a key constructed out of the following three pieces: the full path to the module and the python variables sys.path and sys.argv . A problem arises when the CRAB configuration parameter JobType.pyCfgParams is used.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Multiple submission produces different PSet Dump.py files",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Multiple_submission_produces_dif"
+    ],
+    "answer": "If the PSetDump.py file (found in task_directory/inputs ) differs for the tasks from a multiple-submission python file, try forking the submission into different python processes, as recommended in the previous FAQ.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "ERROR: Syntax Error: invalid syntax (Mixins.py, line 714)",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#ERROR_SyntaxError_invalid_syntax"
+    ],
+    "answer": "The problematic pset is FWCore/ParameterSet/Mixins.py from CMSSW: [line 714] p = tLPTest(\"MyType\",** { \"a\"+str(x): tLPTestType(x) for x in xrange(0,300) } ) This uses dictionary comprehensions, a feature available in python > 2.7. While CMSSW (setup via cmsenv ) uses python > 2.7, CRAB (setup via /cvmfs/cms.cern.ch/crab3/crab.sh ) still uses python 2.6.8. To overcome this problem, don't setup the CRAB environment and instead use the crab-env-bootstrap.sh script (see this FAQ ).",
+    "sources_match_field": [
+      "url"
+    ]
+  }
+]

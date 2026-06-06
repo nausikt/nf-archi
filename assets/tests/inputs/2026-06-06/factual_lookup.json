@@ -1,0 +1,102 @@
+[
+  {
+    "question": "Does CRAB setup conflict with CMSSW setup",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Does_CRAB_setup_conflict_with_CM"
+    ],
+    "answer": "No. CRAB client runs within the CMSSW environment. Make sure you always do cmsenv before using CRAB",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "What is the maximum memory per job (max Memory MB) I can request?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#What_is_the_maximum_memory_per_j"
+    ],
+    "answer": "CRAB requests by default a maximum memory of 2000 MB. This is the maximum memory per core all sites guarantee they will run. Some sites, but not many, offer a bit more (typically 2500 MB); and some sites even offer 4000 MB for special users. OTOH the pilot overlay framework (aka GlideinWMS ) which CMS uses now allows to run also jobs which require more Memory at the cost of potentially leaving some CPU's ide.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "User quota in the CRAB cache",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#User_quota_in_the_CRAB_cache"
+    ],
+    "answer": "There is no quota on CRAB Cache anymore The CRAB User File Cache, or CRAB cache for short, is the place where: the CRAB client puts the user input sandboxes when submitting a task to the CRAB server; the CRAB client puts the crab.log files when they are uploaded via crab uploadlog ; the CRAB server puts the archives produced by the dry run submissions; etc.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "What is the maximum allowed size of the user input sandbox?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#What_is_the_maximum_allowed_size"
+    ],
+    "answer": "120 MB.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "What are the files CRAB adds to the user input sandbox?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#What_are_the_files_CRAB_adds_to"
+    ],
+    "answer": "CRAB adds to the user input sandbox the following directories/files, when a directory is incuded all the containted subdirectories are also recursively included: The directories $CMSSW_BASE/lib , $CMSSW_BASE/biglib , $CMSSW_BASE/module and $CMSSW_BASE/config/SCRAM/hooks . One can also tell CRAB to include the directory $CMSSW_BASE/python by setting JobType.sendPythonFolder = True in the CRAB configuration.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "What are the allowed stageout LFN paths with CRAB?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#What_are_the_allowed_stageout_LF"
+    ],
+    "answer": "CRAB allows only the following LFN directory paths for stageout: /store/user/[rucio/]<username>[/<subdirs>] where username is the CERN primary account username; /store/group[/rucio]/<groupname>[/<subdirs>] where groupname can be any already existing directory under /store/group/ . If not publishing, /store/local/<dir>[/<subdirs>] is also allowed. If /rucio is present, CRAB will use Rucio for stageout. User will need to have Rucio quota at the destination storage site.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Can I stage out my files into a/store/user/area that uses a different username than the one of my CERN primary account?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Can_I_stage_out_my_files_into_a"
+    ],
+    "answer": "Short answer: No. Explanation and details: CRAB will look up for the user's username registered in CMS (which is the username of the CERN primary account) using for the query the user's DN (which in turn is extracted from the user's credentials) and will try to stage out to /store/user/<username>/ (by default). If the store user area uses a different username, it�s up to the destination site to remap that (via a symbolic link or something similar).",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "How much time to I have to complete a task",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_much_time_to_I_have_to_compl"
+    ],
+    "answer": "Tasks are purged from the system 30 days after submission to make room for new ones. You need to actively follow up on submitted tasks, make sure your output is collected and bookkeeping completed before that time. What do I do if my task can not complete in 30 days If things are not done by than, changes are that somehting in the task submission was wrong or jobs critically depend on one particular site and that is down or overfull.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "I can not find information on my old tasks (can not resubmit etc..)",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#I_can_not_find_information_on_my"
+    ],
+    "answer": "Tasks are purged from the system 30 days after submission to make room for new ones. See above FAQ Show Hide Use the --dryrun option when doing crab submit . See crab submit --dryrun .",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "User quota in the CRAB scheduler machines",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#User_quota_in_the_CRAB_scheduler"
+    ],
+    "answer": "Each user has a home directory with 100GB of disk space in each of the scheduler machines (schedd for short) assigned to CRAB3 for submitting jobs to the Grid. Whenever a task is submitted by the CRAB server to a schedd, a task directory is created in this space containing among other things CRAB libraries and scripts needed to run the jobs. Log files from Condor/DAGMan and CRAB itself are also placed there.",
+    "sources_match_field": [
+      "url"
+    ]
+  }
+]

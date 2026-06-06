@@ -1,3 +1,45 @@
+# ── Nextflow runtime ──────────────────────────────────────────────────────
+.nextflow/
+.nextflow.log
+.nextflow.log.*
+work/
+
+# ── Nextflow outputs (opt-in to track specific results if needed) ─────────
+results/
+
+# ── nf-test ───────────────────────────────────────────────────────────────
+.nf-test/
+.nf-test.log
+
+# ── JVM / Groovy ──────────────────────────────────────────────────────────
+*.class
+
+# ── Java jars — fetch via lib/fetch_jars.sh ───────────────────────────────
+lib/*.jar
+
+# ── Singularity / Apptainer image cache ───────────────────────────────────
+*.sif
+*.img
+
+# ── Conda environments ────────────────────────────────────────────────────
+.conda/
+conda/
+
+# ── Environment / secrets ─────────────────────────────────────────────────
+.env
+*.secret
+tower.yml
+
+# ── macOS ─────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── IDE ───────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
