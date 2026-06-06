@@ -1,0 +1,122 @@
+[
+  {
+    "question": "What is the 'Automatic'splitting mode?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#What_is_the_Automatic_splitting"
+    ],
+    "answer": "The Data.splitting parameter has now a default value: 'Automatic' . With such a setting the task processing is split into three stages: A \"probe\" stage, where some probe jobs are submitted to estimate the event throughput of the CMSSW parameter-set configuration provided by the user in the JobType.psetName parameter and possible further arguments.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Should I use Automatic splitting or dryrun or ... ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Should_I_use_Automatic_splitting"
+    ],
+    "answer": "PRELIMINARY WRITEUP CRAB tries to support these two use case. For which the only solution was --dryrun when we initially introduced CRAB3 and so many users are stickting to it quick check that this config runs with CRAB some preliminary look at time/memory usage for tuning splitting But other tools are now availalbe ( crab preparelocal and Automatic Splitting ) which are better suited for this: can be done with preparelocal, but we need to write down some details on how to do it and possibly add...",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "How are the input Files handled in the user input sandbox?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_are_the_inputFiles_handled_i"
+    ],
+    "answer": "Note The user application (be it cmsRun or scriptExe ) is executed with current directory set to the intial working directory of the job, usually /srv in the \"Singularity era, circa 2022/3..\" The user sandbox is expanded in the $CMSSW_BASE directory in execution machine. Usually /srv/CMSSW_X_Y_Z/ . So that all files and directories tarred from the original scram tree on the client are restored in the right place.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Recovery task",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Recovery_task"
+    ],
+    "answer": "Recovery task: What Recovery task is an important concept that can be useful in many circumstances. The general idea is that a CRAB task has run to completion, all re-submission attempts done, but some of the necessary input data was not processed. A recovery task will run the same executable and configuration on the missed input data, and will add results to the same output destination (and DBS dataset) as the original task.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Recovery task: What",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Recovery_task_What"
+    ],
+    "answer": "Recovery task is an important concept that can be useful in many circumstances. The general idea is that a CRAB task has run to completion, all re-submission attempts done, but some of the necessary input data was not processed. A recovery task will run the same executable and configuration on the missed input data, and will add results to the same output destination (and DBS dataset) as the original task.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Recovery task: Why",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Recovery_task_Why"
+    ],
+    "answer": "CRAB developers try hard to give you a tool with perfect bookkeeping and full automation which brings each task to 100% success. Similarly do strive the operators of the global CMS submission infrastructure (aka HTCondor pool, aka glideIn) and the administrator of the many sites that contribute hardware resources for CMS data analysis. Yet at times things can go wrong, and we may not be able to investigate and fix every small glitch, and surely never within hours or days.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Recovery task: When",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Recovery_task_When"
+    ],
+    "answer": "A partial list of real life events where a recovery task is user's fastest and simplest way to get work done: Something went wrong in the global infrastructure and some jobs are lost beyond recovery Something went wrong inside CRAB (bugs, hardware...) which can't be fixed by crab resubmit command Some site went down for longer than it make sense to keep jobs in the queue Some data was not available and had to be retransferred and took longer than...",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "How CRAB finds data in input datasets from DBS",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_CRAB_finds_data_in_input_dat"
+    ],
+    "answer": "The following remarks apply to the main input dataset provided to CRAB via the Data.inputDataset configuration parameter: Dataset status : Datasets in DBS can have different status. This is controlled by Production and the norm is to use VALID datasets. Datasets with different status may occasionally be useful, e.g. for comparison or dedicated study of the problems which led them to be deprecated.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "How many jobs can I run at the same time ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#How_many_jobs_can_I_run_at_the_s"
+    ],
+    "answer": "CRAB runs jobs on the Grid using a global HTCondor pool created via glideInWms machinery, think of it like a global batch system whith execution nodes all over the places. The most important thing which controls how many jobs you can run is the overall number of execution slots (CPU's) available for your jobs, i.e. that match your requirement of data access, memory and running time. Then HTCondor tries hard to give to every user the same share of computing resources, i.e.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Why are tasks removed after 30 days",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Why_are_tasks_removed_after_30_d"
+    ],
+    "answer": "High level information on each task (name, config. param, input..) is kept almost forever in CRAB DataBase . But in order to run a task we need to have a working DAGMAN process on an HTCondor scheduler machine, which takes memory and disk space. We can not keep those around forever, the system would grind to halt. So we need to have a time after which \"everything goes\". This is currnetly configured to be 30 days based on our operational experience in order to keep the system smoothly running.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "Why are my jobs submitted to a site that I had explicitly blacklisted (not whitelisted)?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Why_are_my_jobs_submitted_to_a_s"
+    ],
+    "answer": "There is a site overflow mechanism in place, which takes place after CRAB submission. Sites are divided in regions of good WAN/xrootd connectivity (e.g. US, Italy, Germany etc.), then jobs queued at one site A for too long are allowed to overflow to a well connected site B which does not host the requested input data but from where data will be read over xrootd.",
+    "sources_match_field": [
+      "url"
+    ]
+  },
+  {
+    "question": "What is glidein Wms Overflow and how can I avoid using it ?",
+    "sources": [
+      "https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#What_is_glideinWms_Overflow_and"
+    ],
+    "answer": "See above FAQ",
+    "sources_match_field": [
+      "url"
+    ]
+  }
+]

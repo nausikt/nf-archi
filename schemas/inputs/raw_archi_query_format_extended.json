@@ -1,0 +1,27 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "raw_archi_query_format_extended.json",
+    "title": "Raw Archi Query Format — Extended",
+    "description": "Extends base format with source system reference fields (Discourse, Mattermost, etc.)",
+    "allOf": [
+        { "$ref": "raw_archi_query_format.json" }
+    ],
+    "properties": {
+        "external_id": {
+            "type": "string",
+            "description": "ID of the original record in the source system",
+            "minLength": 1
+        },
+        "external_url": {
+            "type": "string",
+            "description": "Direct URL back to the original post or thread",
+            "format": "uri"
+        },
+        "external_source": {
+            "type": "string",
+            "description": "Which system this record originated from",
+            "enum": ["discourse", "mattermost"]
+        }
+    },
+    "required": []
+}

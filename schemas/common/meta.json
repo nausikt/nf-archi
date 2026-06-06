@@ -1,0 +1,25 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "meta.json",
+    "title": "Archi Pipeline Meta",
+    "description": "Pipeline routing and tracking fields only — carries no data payload",
+    "type": "object",
+    "properties": {
+        "sample_id": {
+            "type": "string",
+            "description": "Unique identifier injected by ChannelUtils",
+            "pattern": "^[a-zA-Z0-9_-]+$"
+        },
+        "workflow": {
+            "type": "string",
+            "description": "Which workflow is processing this record",
+            "enum": ["benchmarking", "bootstrapping", "prelabelling"]
+        },
+        "batch": {
+            "type": "string",
+            "description": "Source batch or file this record came from"
+        }
+    },
+    "required": ["sample_id", "workflow"],
+    "additionalProperties": false
+}
