@@ -1,6 +1,6 @@
 include { validateParameters } from 'plugin/nf-schema'
 include { LoadQueries        } from '../subworkflows/io/load_queries.nf'
-include { Clustering         } from '../modules/bootstrapping/clustering.nf'
+include { CollectDataset } from '../subworkflows/io/collect_dataset.nf'
 
 workflow BootstrappingDataset {
 
@@ -23,5 +23,5 @@ workflow BootstrappingDataset {
     //     "▶  [${meta.sample_id}] ${meta.batch} — ${record.question}"
     // }
 
-    Clustering(LoadQueries.out.records)
+    CollectDataset(LoadQueries.out.records, params.outdir)
 }
