@@ -30,6 +30,16 @@
                 "input": {
                     "type": "string",
                     "description": "Path or glob to query files (.json or .jsonl)"
+                },
+                "embed": {
+                    "type": "object",
+                    "description": "Embedding settings (Ollama)",
+                    "properties": {
+                        "endpoint":   { "type": "string",  "default": "http://submit76.mit.edu:7870"},
+                        "model":      { "type": "string",  "default": "qwen3-embedding:8b" },
+                        "text_fields": { "type": "array", "items": { "type": "string" }, "default": ["question", "answer"] },
+                        "batch_size": { "type": "integer", "default": 64 }
+                    }
                 }
             }
         },
