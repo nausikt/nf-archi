@@ -2,6 +2,7 @@ include { validateParameters } from 'plugin/nf-schema'
 include { LoadQueries        } from '../subworkflows/io/load_queries.nf'
 include { CollectDataset } from '../subworkflows/io/collect_dataset.nf'
 include { Embed } from '../modules/bootstrapping/embed.nf'
+include { Clustering } from '../subworkflows/bootstrapping/clustering.nf'
 
 workflow BootstrappingDataset {
 
@@ -26,4 +27,5 @@ workflow BootstrappingDataset {
 
     CollectDataset(LoadQueries.out.records, params.outdir)
     Embed(CollectDataset.out.dataset)
+    Clustering(Embed.out.embeddings, params.cluster.runs)
 }

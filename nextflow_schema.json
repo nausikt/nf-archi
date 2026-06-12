@@ -40,6 +40,14 @@
                         "text_fields": { "type": "array", "items": { "type": "string" }, "default": ["question", "answer"] },
                         "batch_size": { "type": "integer", "default": 64 }
                     }
+                },
+                "cluster": {
+                    "type": "object",
+                    "description": "Clustering ensemble settings",
+                    "properties": {
+                        "runs": { "type": "string", "description": "Path to ensemble runs JSON" },
+                        "seed": { "type": "integer", "default": 42 }
+                    }
                 }
             }
         },
