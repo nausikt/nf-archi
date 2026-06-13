@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "cluster_run.json",
+    "title": "Clustering Ensemble Run",
+    "description": "One configured clustering algorithm = one ensemble member.",
+    "type": "object",
+    "properties": {
+        "name":               { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_]+$" },
+        "algorithm":          { "type": "string", "enum": ["hdbscan", "kmeans", "agglomerative"] },
+        "min_cluster_size":   { "type": "integer", "minimum": 2 },
+        "min_samples":        { "type": ["integer", "null"], "minimum": 1 },
+        "n_clusters":         { "type": "integer", "minimum": 2 },
+        "distance_threshold": { "type": "number", "minimum": 0 },
+        "linkage":            { "type": "string", "enum": ["average", "complete", "single", "ward"] },
+        "metric":             { "type": "string" }
+    },
+    "required": ["name", "algorithm"],
+    "additionalProperties": false,
+    "allOf": [
+        { "if": { "properties": { "algorithm": { "const": "hdbscan" } } },
+          "then": { "required": ["min_cluster_size"] } },
+        { "if": { "properties": { "algorithm": { "const": "kmeans" } } },
+          "then": { "required": ["n_clusters"] } },
+        { "if": { "properties": { "algorithm": { "const": "agglomerative" } } },
+          "then": { "anyOf": [ { "required": ["n_clusters"] }, { "required": ["distance_threshold"] } ] } },
+        { "if": { "properties": { "linkage": { "const": "ward" } } },
+          "then": { "properties": { "metric": { "const": "euclidean" } } } }
+    ]
+}
