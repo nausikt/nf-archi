@@ -1,0 +1,31 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "taxonomy.json",
+    "title": "Pre-labeling Taxonomy",
+    "description": "User priors grouped by kind. Section name = kind: categories (mutually exclusive), tags (multi-select topic), flags (multi-select meta-judgment).",
+    "type": "object",
+    "$defs": {
+        "item": {
+            "type": "object",
+            "properties": {
+                "id":         { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_]+$" },
+                "name":       { "type": "string", "minLength": 1 },
+                "definition": { "type": "string", "minLength": 1 }
+            },
+            "required": ["id", "name", "definition"],
+            "additionalProperties": false
+        }
+    },
+    "properties": {
+        "categories":  { "type": "array", "items": { "$ref": "#/$defs/item" } },
+        "tags":        { "type": "array", "items": { "$ref": "#/$defs/item" } },
+        "flags":       { "type": "array", "items": { "$ref": "#/$defs/item" } },
+        "text_fields": { "type": "array", "items": { "type": "string" } }
+    },
+    "anyOf": [
+        { "required": ["categories"] },
+        { "required": ["tags"] },
+        { "required": ["flags"] }
+    ],
+    "additionalProperties": false
+}

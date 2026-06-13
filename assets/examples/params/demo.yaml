@@ -1,0 +1,161 @@
+# Experiment payload for the full bootstrapping demo (pure data, no paths).
+# Structural params (workflow, input) come from the demo_bootstrapping profile:
+#   nextflow run . -profile demo_bootstrapping,conda -params-file assets/examples/params/demo.yaml
+cluster:
+  grid:
+    hdbscan:
+      min_cluster_size: [3, 5, 8]
+      min_samples: [null, 5]
+    kmeans:
+      n_clusters: [4, 6]
+    agglomerative:
+      n_clusters: [4]
+      linkage: [average]
+      metric: [cosine]
+
+anchors:
+  # ── Categories: WHAT KIND of question (intent) ───────────────────────────
+  # Mutually exclusive — every record gets exactly one category.
+  categories:
+    - id: data_query
+      name: "Data query"
+      definition: "Locate, enumerate, or describe datasets, files, blocks, or replicas (DAS/DBS-style lookups)."
+
+    - id: debugging
+      name: "Debugging"
+      definition: "Diagnose a concrete failure: job error, stageout failure, auth/proxy issue, broken submission."
+
+    - id: exploratory
+      name: "Exploratory"
+      definition: "Open-ended how-things-work questions about CMS infrastructure, services, or workflows."
+
+    - id: factual
+      name: "Factual lookup"
+      definition: "Single-answer factual question: a version, an endpoint, a deadline, a contact, a definition."
+
+    - id: procedural
+      name: "Procedural"
+      definition: "Step-by-step how-to: how to submit, configure, publish, retrieve, or migrate."
+
+    - id: other
+      name: "Other"
+      definition: "Does not fit the above. Often greetings, meta-questions, or off-topic."
+
+  # ── Tags: WHAT TOPIC the question touches (multi-select) ─────────────────
+  # Free combinations. Group hints in comments for readability only.
+  tags:
+    # Compute & submission
+    - id: crab
+      name: "CRAB"
+      definition: "CMS Remote Analysis Builder — submission, monitoring, resubmission of grid jobs."
+    - id: cmssw
+      name: "CMSSW"
+      definition: "CMS software framework — releases, configs, modules, build issues."
+    - id: htcondor
+      name: "HTCondor"
+      definition: "Job scheduler underlying CRAB and global pool."
+    - id: glidein_wms
+      name: "GlideinWMS"
+      definition: "Glide-in workload management for grid resources."
+    - id: job_submission
+      name: "Job submission"
+      definition: "Submitting tasks, configuring inputs, output stageout."
+    - id: task_status
+      name: "Task status"
+      definition: "Querying or interpreting CRAB task / job state."
+
+    # Data
+    - id: dbs
+      name: "DBS"
+      definition: "Dataset Bookkeeping System — dataset, block, file metadata."
+    - id: rucio
+      name: "Rucio"
+      definition: "Data management and replication system."
+    - id: das
+      name: "DAS"
+      definition: "Data Aggregation Service — query interface across DBS/Rucio/Phedex."
+    - id: data_discovery
+      name: "Data discovery"
+      definition: "Finding datasets matching some criteria across catalogs."
+    - id: publication
+      name: "Publication"
+      definition: "Publishing produced datasets, validating provenance, registering blocks."
+
+    # Storage & sites
+    - id: storage
+      name: "Storage"
+      definition: "Disk/tape, quota, transfer mechanisms."
+    - id: eos
+      name: "EOS"
+      definition: "CERN EOS storage system."
+    - id: site_status
+      name: "Site status"
+      definition: "Operational state of a Tier-0/1/2/3 site."
+    - id: site_issue
+      name: "Site issue"
+      definition: "Concrete problem affecting a specific site or fabric."
+
+    # Auth & ops
+    - id: auth_access
+      name: "Auth / access"
+      definition: "Proxies, VOMS, tokens, access rights."
+    - id: certificates
+      name: "Certificates"
+      definition: "Grid certificates, VOMS proxies, renewals."
+    - id: opensearch
+      name: "OpenSearch"
+      definition: "OpenSearch backend used for monitoring and log search."
+    - id: documentation
+      name: "Documentation"
+      definition: "Question about, or pointing to, official docs/TWiki/wiki pages."
+
+  # ── Flags: META-JUDGMENT about the record itself ─────────────────────────
+  # Multi-select. About handling, not topic.
+  flags:
+    - id: needs_domain_expert
+      name: "Needs domain expert"
+      definition: "Beyond general support — requires a CMS sub-system expert to answer authoritatively."
+
+    - id: referral_needed
+      name: "Referral needed"
+      definition: "Should be routed to another team, channel, or service desk."
+
+    - id: needs_more_context
+      name: "Needs more context"
+      definition: "Question is underspecified — missing logs, dataset name, error message, or version."
+
+    - id: operational_status_dependent
+      name: "Operational status dependent"
+      definition: "Answer changes with current site / service / job state."
+
+    - id: knowledge_boundary
+      name: "Knowledge boundary"
+      definition: "Sits at the edge of what's documented or known — answer may be partial."
+
+    - id: cmssw_boundary
+      name: "CMSSW boundary"
+      definition: "Touches CMSSW internals where CRAB/ops support is limited."
+
+    - id: service_boundary
+      name: "Service boundary"
+      definition: "Crosses into another service's domain (Rucio, DBS, EOS, T0 ops)."
+
+    - id: timeless
+      name: "Timeless"
+      definition: "Answer is stable across time — safe to cache as gold."
+
+    - id: time_dependent
+      name: "Time dependent"
+      definition: "Answer is correct only for a specific period (campaign, release, deadline)."
+
+    - id: ambiguous
+      name: "Ambiguous"
+      definition: "Multi-intent, ill-formed, or interpretation-dependent question."
+
+    - id: requires_live_lookup
+      name: "Requires live lookup"
+      definition: "Cannot be answered statically — needs querying DAS/DBS/Rucio/monitoring at answer time."
+
+    - id: likely_user_code_issue
+      name: "Likely user code issue"
+      definition: "Symptom suggests user analysis code is at fault, not CMS infrastructure."
