@@ -1,4 +1,5 @@
-include { Cluster } from '../../modules/bootstrapping/cluster.nf'
+include { Cluster }  from '../../modules/bootstrapping/cluster.nf'
+include { Ensemble } from '../../modules/bootstrapping/ensemble.nf'
 
 workflow Clustering {
 
@@ -24,7 +25,10 @@ workflow Clustering {
     ch_emb  = embeddings.first()
 
     Cluster(ch_runs, ch_emb)
+    Ensemble(Cluster.out.labels.collect())
 
     emit:
-    labels = Cluster.out.labels
+    labels    = Cluster.out.labels
+    consensus = Ensemble.out.consensus
+    coassoc   = Ensemble.out.coassoc
 }
