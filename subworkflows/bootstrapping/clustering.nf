@@ -26,10 +26,10 @@ workflow Clustering {
     ch_emb  = embeddings.first()
 
     Cluster(ch_runs, ch_emb)
-    Ensemble(Cluster.out.labels.collect())
+    Ensemble(Cluster.out.labels.collect(), Cluster.out.metrics.collect())
     Representatives(ch_emb, Ensemble.out.consensus)
 
-    // per-member quality metrics -> one JSONL artifact (basis for weighting)
+    // per-member quality metrics -> one JSONL artifact (raw inputs to weighting)
     ch_member_metrics = Cluster.out.metrics
         .collectFile(name: 'member_metrics.jsonl', newLine: true, sort: true,
                      storeDir: "${params.outdir}/bootstrapping")
@@ -38,6 +38,7 @@ workflow Clustering {
     labels          = Cluster.out.labels
     consensus       = Ensemble.out.consensus
     coassoc         = Ensemble.out.coassoc
+    weights         = Ensemble.out.weights
     representatives = Representatives.out.representatives
     member_metrics  = ch_member_metrics
 }
