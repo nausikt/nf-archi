@@ -30,6 +30,79 @@
                 "input": {
                     "type": "string",
                     "description": "Path or glob to query files (.json or .jsonl)"
+                },
+                "embed": {
+                    "type": "object",
+                    "description": "Embedding settings (Ollama)",
+                    "properties": {
+                        "endpoint":   { "type": "string",  "default": "http://submit76.mit.edu:7870"},
+                        "model":      { "type": "string",  "default": "qwen3-embedding:8b" },
+                        "text_fields": { "type": "array", "items": { "type": "string" }, "default": ["question", "answer"] },
+                        "batch_size": { "type": "integer", "default": 64 }
+                    }
+                },
+                "reduce": {
+                    "type": "object",
+                    "description": "Dimensionality reduction (PCA -> UMAP) before clustering",
+                    "properties": {
+                        "seed":           { "type": "integer", "default": 42 },
+                        "pca_components": { "type": "integer", "default": 50, "description": "Shared PCA pre-reduction (clamped to n_samples-1)" },
+                        "n_components":   { "type": "integer", "default": 10, "description": "Clustering-space UMAP dimensionality" },
+                        "n_neighbors":    { "type": "integer", "default": 10, "description": "Clustering-space UMAP neighborhood size" },
+                        "min_dist":       { "type": "number",  "default": 0.0, "description": "Clustering-space UMAP packing (0 = tight, density-preserving)" },
+                        "viz": {
+                            "type": "object",
+                            "description": "Viz-space UMAP (3D)",
+                            "properties": {
+                                "n_neighbors": { "type": "integer", "default": 15 },
+                                "min_dist":    { "type": "number",  "default": 0.1 }
+                            }
+                        }
+                    }
+                },
+                "cluster": {
+                    "type": "object",
+                    "description": "Clustering ensemble settings",
+                    "properties": {
+                        "runs": { "type": "string", "description": "Path to ensemble runs JSON" },
+                        "seed": { "type": "integer", "default": 42 },
+                        "grid": {
+                            "type": ["object", "null"],
+                            "default": null,
+                            "description": "Hyperparameter grid; when set, overrides runs.json. Keys hdbscan|kmeans|agglomerative -> {param: [values]}. Deep-validated against schemas/cluster/grid.json"
+                        },
+                        "consensus_threshold": {
+                            "type": "number",
+                            "default": 0.5,
+                            "description": "Min mean co-association for samples to stay in the same consensus cluster"
+                        }
+                    }
+                },
+                "anchors": {
+                    "type": "object",
+                    "description": "Pre-labeling anchors (user priors embedded into the data space). Provide via -params-file; deep-validated against schemas/anchors/taxonomy.json",
+                    "properties": {
+                        "text_fields": { "type": "array", "items": { "type": "string" }, "default": ["name", "definition"] },
+                        "categories":  { "type": ["array", "null"], "default": null, "description": "Mutually-exclusive intent anchors {id, name, definition}" },
+                        "tags":        { "type": ["array", "null"], "default": null, "description": "Multi-select topic anchors {id, name, definition}" },
+                        "flags":       { "type": ["array", "null"], "default": null, "description": "Multi-select meta-judgment anchors {id, name, definition}" }
+                    }
+                },
+                "assign": {
+                    "type": "object",
+                    "description": "Anchor assignment settings",
+                    "properties": {
+                        "top_k": { "type": "integer", "default": 3, "description": "Ranked nearest-anchor suggestions per sample/cluster" }
+                    }
+                },
+                "representatives": {
+                    "type": "object",
+                    "description": "Per-cluster representative sampling for expert review",
+                    "properties": {
+                        "n_medoid":   { "type": "integer", "default": 3, "description": "Most-typical records per cluster (nearest centroid)" },
+                        "n_boundary": { "type": "integer", "default": 5, "description": "Most ambiguous records per cluster (smallest margin)" },
+                        "n_outlier":  { "type": "integer", "default": 3, "description": "Most anomalous records per cluster (far from all / noise)" }
+                    }
                 }
             }
         },
