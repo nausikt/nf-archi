@@ -19,8 +19,11 @@ process Ensemble {
     path "member_weights.json",  emit: weights
 
     script:
+    // Canonical (key-sorted) JSON so re-ordering the override map does NOT
+    // change the script text -> no spurious cache miss. Editing an actual
+    // weight DOES change it -> Ensemble (and only Ensemble onward) recomputes.
     def mw = params.ensemble.member_weights
-    def overrides = JsonOutput.toJson(mw instanceof Map ? mw : [:])
+    def overrides = JsonOutput.toJson((mw instanceof Map ? mw : [:]).sort())
     """
     ensemble.py \\
         --inputs ${label_files} \\

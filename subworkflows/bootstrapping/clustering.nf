@@ -26,7 +26,12 @@ workflow Clustering {
     ch_emb  = embeddings.first()
 
     Cluster(ch_runs, ch_emb)
-    Ensemble(Cluster.out.labels.collect(), Cluster.out.metrics.collect())
+
+    // Deterministic order into Ensemble: collect() emits in task-completion
+    // order (nondeterministic), which would change the staged file list and
+    // thrash Ensemble's cache on every -resume. toSortedList() pins the order
+    // so Ensemble caches whenever its inputs/params are unchanged.
+    Ensemble(Cluster.out.labels.toSortedList(), Cluster.out.metrics.toSortedList())
     Representatives(ch_emb, Ensemble.out.consensus)
 
     // per-member quality metrics -> one JSONL artifact (raw inputs to weighting)
