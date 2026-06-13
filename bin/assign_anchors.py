@@ -5,6 +5,16 @@ Per-sample: top-k nearest anchors *within each kind* (category/tag/flag) by
 cosine -> ranked suggestions for the expert's first pass. Per-cluster: the same,
 against the consensus centroid (the reconcile view). Ranking within kind keeps
 the mutually-exclusive categories from being crowded out by the many tags/flags.
+
+All similarity is computed in the RAW embedding space (where the model is
+calibrated). umap3 is borrowed only for *placement* on the dashboard:
+  - points.parquet        (A): per-sample drawing row = umap3 (x,y,z) + the top-1
+                               anchor per kind + consensus/stability, so dots can
+                               be colored by their assignment.
+  - anchor_points.parquet (B): each anchor placed at the centroid (in umap3) of
+                               the samples that pick it #1 within its kind; an
+                               anchor nobody picks falls back to its top-k nearest
+                               samples by raw cosine.
 """
 import argparse
 import json
@@ -20,6 +30,12 @@ def load_vectors(path):
     ids = t.column("sample_id").to_pylist()
     X = normalize(np.asarray(t.column("embedding").to_pylist(), dtype=np.float32))
     return ids, X
+
+
+def load_umap3(path, order):
+    """umap3 (x,y,z) aligned to `order` -> [n_samples x 3]."""
+    t = pq.read_table(path).to_pandas().set_index("sample_id").reindex(order)
+    return t[["x", "y", "z"]].to_numpy(dtype=np.float32)
 
 
 def read_jsonl(path):
@@ -39,9 +55,12 @@ def main():
     ap.add_argument("--anchors", required=True)
     ap.add_argument("--anchor-meta", required=True)
     ap.add_argument("--ensemble", required=True)
+    ap.add_argument("--umap3", required=True)
     ap.add_argument("--top-k", type=int, default=3)
     ap.add_argument("--prelabels", required=True)
     ap.add_argument("--cluster-suggestions", required=True)
+    ap.add_argument("--points", required=True)          # A: per-sample drawing table
+    ap.add_argument("--anchor-points", required=True)   # B: anchor marker positions
     args = ap.parse_args()
 
     s_ids, Xs = load_vectors(args.embeddings)
@@ -101,10 +120,48 @@ def main():
     with open(args.cluster_suggestions, "w") as fh:
         json.dump(clusters, fh, indent=2)
 
+    # ---- A: per-sample drawing table (umap3 coords + top-1 anchor per kind) ----
+    V = load_umap3(args.umap3, s_ids)
+    top1 = {kind: np.asarray(idxs)[sims[:, idxs].argmax(axis=1)]
+            for kind, idxs in kinds.items()}
+    points = {
+        "sample_id":       s_ids,
+        "x": V[:, 0], "y": V[:, 1], "z": V[:, 2],
+        "consensus_label": cons.astype(int),
+        "stability":       stab.astype(np.float32),
+    }
+    for kind, best_ai in top1.items():
+        points[f"top_{kind}"]       = [meta.get(a_ids[ai], {}).get("name") for ai in best_ai]
+        points[f"top_{kind}_score"] = [float(sims[si, ai]) for si, ai in enumerate(best_ai)]
+    pq.write_table(pa.Table.from_pandas(pd.DataFrame(points), preserve_index=False), args.points)
+
+    # ---- B: anchor markers = centroid (in umap3) of samples that pick it #1 ----
+    support = {ai: [] for ai in range(len(a_ids))}
+    for best_ai in top1.values():
+        for si, ai in enumerate(best_ai):
+            support[int(ai)].append(si)
+    apoints = []
+    for ai, aid in enumerate(a_ids):
+        members, placement = support[ai], "assigned"
+        if not members:                                  # nobody ranks it #1
+            members = list(np.argsort(-sims[:, ai])[:min(args.top_k, len(s_ids))])
+            placement = "fallback"
+        c = V[members].mean(axis=0)
+        apoints.append({
+            "anchor_id":   aid,
+            "anchor_kind": meta.get(aid, {}).get("kind", "unknown"),
+            "anchor_name": meta.get(aid, {}).get("name"),
+            "x": float(c[0]), "y": float(c[1]), "z": float(c[2]),
+            "n_support":   len(members),
+            "placement":   placement,
+        })
+    pq.write_table(pa.Table.from_pandas(pd.DataFrame(apoints), preserve_index=False), args.anchor_points)
+
     summary = ", ".join(f"{k}:{len(v)}" for k, v in kinds.items())
     print(f"[assign] {len(s_ids)} samples x {len(a_ids)} anchors ({summary}), "
           f"top-{args.top_k}/kind -> {args.prelabels}; "
-          f"{len(clusters)} clusters -> {args.cluster_suggestions}")
+          f"{len(clusters)} clusters -> {args.cluster_suggestions}; "
+          f"points -> {args.points}; anchor markers -> {args.anchor_points}")
 
 
 if __name__ == "__main__":
