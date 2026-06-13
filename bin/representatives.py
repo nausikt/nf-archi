@@ -16,7 +16,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-from sklearn.preprocessing import normalize
+from sklearn.metrics.pairwise import euclidean_distances
 
 
 def main():
@@ -33,21 +33,20 @@ def main():
     emb = pq.read_table(args.embeddings).to_pandas().set_index("sample_id")
     emb = emb.reindex(ens["sample_id"])              # align to ensemble order
 
-    X = normalize(np.asarray(emb["embedding"].tolist(), dtype=np.float32))
+    # reduced UMAP space is euclidean — do NOT re-normalize (point #2)
+    X = np.asarray(emb["embedding"].tolist(), dtype=np.float32)
     consensus = ens["consensus_label"].to_numpy()
     stability = ens["stability"].to_numpy()
     noise_rate = ens["noise_rate"].to_numpy()
     n = len(ens)
 
-    # L2-normalized centroid per consensus cluster
+    # plain (un-normalized) centroid per consensus cluster
     clusters = sorted(set(int(c) for c in consensus))
     col = {c: j for j, c in enumerate(clusters)}
-    C = np.vstack([
-        normalize(X[consensus == c].mean(axis=0, keepdims=True))[0]
-        for c in clusters
-    ])
+    C = np.vstack([X[consensus == c].mean(axis=0) for c in clusters])
 
-    sims = X @ C.T                                    # [n_samples x n_clusters]
+    # euclidean distance -> monotone similarity in (0, 1]: closer => higher
+    sims = 1.0 / (1.0 + euclidean_distances(X, C))    # [n_samples x n_clusters]
     own_col = np.array([col[int(c)] for c in consensus])
     sim_own = sims[np.arange(n), own_col]
 

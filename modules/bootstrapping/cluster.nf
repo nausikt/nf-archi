@@ -15,6 +15,7 @@ process Cluster {
 
     output:
     path "cluster_${run.name}.parquet", emit: labels
+    path "metrics_${run.name}.json",    emit: metrics
 
     script:
     def run_json = JsonOutput.toJson(run)
@@ -22,7 +23,9 @@ process Cluster {
     cluster.py \\
         --input ${embeddings} \\
         --output cluster_${run.name}.parquet \\
+        --metrics metrics_${run.name}.json \\
         --run '${run_json}' \\
+        --space ${params.cluster.metric_space} \\
         --seed ${params.cluster.seed}
     """
 }
