@@ -41,6 +41,25 @@
                         "batch_size": { "type": "integer", "default": 64 }
                     }
                 },
+                "reduce": {
+                    "type": "object",
+                    "description": "Dimensionality reduction (PCA -> UMAP) before clustering",
+                    "properties": {
+                        "seed":           { "type": "integer", "default": 42 },
+                        "pca_components": { "type": "integer", "default": 50, "description": "Shared PCA pre-reduction (clamped to n_samples-1)" },
+                        "n_components":   { "type": "integer", "default": 10, "description": "Clustering-space UMAP dimensionality" },
+                        "n_neighbors":    { "type": "integer", "default": 10, "description": "Clustering-space UMAP neighborhood size" },
+                        "min_dist":       { "type": "number",  "default": 0.0, "description": "Clustering-space UMAP packing (0 = tight, density-preserving)" },
+                        "viz": {
+                            "type": "object",
+                            "description": "Viz-space UMAP (3D)",
+                            "properties": {
+                                "n_neighbors": { "type": "integer", "default": 15 },
+                                "min_dist":    { "type": "number",  "default": 0.1 }
+                            }
+                        }
+                    }
+                },
                 "cluster": {
                     "type": "object",
                     "description": "Clustering ensemble settings",
