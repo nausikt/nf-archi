@@ -1,7 +1,7 @@
 
 process Embed {
 
-    tag "embed"
+    tag "${out_name}"
 
     conda     "${projectDir}/assets/env/embed.yml"
     container 'nf-archi-embed:0.1.0'
@@ -9,19 +9,19 @@ process Embed {
     publishDir "${params.outdir}/bootstrapping", mode: 'copy'
 
     input:
-    path dataset
+    tuple path(records), val(out_name), val(text_fields)
 
     output:
-    path 'embeddings.parquet', emit: embeddings
+    path out_name, emit: embeddings
 
     script:
     """
     embed.py \\
-        --input ${dataset} \\
-        --output embeddings.parquet \\
+        --input ${records} \\
+        --output ${out_name} \\
         --endpoint ${params.embed.endpoint} \\
         --model ${params.embed.model} \\
-        --text-fields ${params.embed.text_fields.join(',')} \\
+        --text-fields ${text_fields} \\
         --batch-size ${params.embed.batch_size}
     """
 }

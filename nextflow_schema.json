@@ -51,7 +51,29 @@
                             "type": ["object", "null"],
                             "default": null,
                             "description": "Hyperparameter grid; when set, overrides runs.json. Keys hdbscan|kmeans|agglomerative -> {param: [values]}. Deep-validated against schemas/cluster/grid.json"
+                        },
+                        "consensus_threshold": {
+                            "type": "number",
+                            "default": 0.5,
+                            "description": "Min mean co-association for samples to stay in the same consensus cluster"
                         }
+                    }
+                },
+                "anchors": {
+                    "type": "object",
+                    "description": "Pre-labeling anchors (user priors embedded into the data space). Provide via -params-file; deep-validated against schemas/anchors/taxonomy.json",
+                    "properties": {
+                        "text_fields": { "type": "array", "items": { "type": "string" }, "default": ["name", "definition"] },
+                        "categories":  { "type": ["array", "null"], "default": null, "description": "Mutually-exclusive intent anchors {id, name, definition}" },
+                        "tags":        { "type": ["array", "null"], "default": null, "description": "Multi-select topic anchors {id, name, definition}" },
+                        "flags":       { "type": ["array", "null"], "default": null, "description": "Multi-select meta-judgment anchors {id, name, definition}" }
+                    }
+                },
+                "assign": {
+                    "type": "object",
+                    "description": "Anchor assignment settings",
+                    "properties": {
+                        "top_k": { "type": "integer", "default": 3, "description": "Ranked nearest-anchor suggestions per sample/cluster" }
                     }
                 }
             }
