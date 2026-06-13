@@ -73,10 +73,14 @@ def main():
             np.fill_diagonal(block, np.nan)
             stability[members] = np.nanmean(block, axis=1).astype(np.float32)
 
+    # per-sample noise_rate = fraction of runs that called it noise (-1, HDBSCAN)
+    noise_rate = (labels == -1).mean(axis=0).astype(np.float32)
+
     pq.write_table(pa.table({
         "sample_id":       pa.array(ids, pa.string()),
         "consensus_label": pa.array(consensus.tolist(), pa.int32()),
         "stability":       pa.array(stability.tolist(), pa.float32()),
+        "noise_rate":      pa.array(noise_rate.tolist(), pa.float32()),
         "n_members":       pa.array([labels.shape[0]] * len(ids), pa.int32()),
     }), args.output)
 

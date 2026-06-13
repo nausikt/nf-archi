@@ -75,6 +75,15 @@
                     "properties": {
                         "top_k": { "type": "integer", "default": 3, "description": "Ranked nearest-anchor suggestions per sample/cluster" }
                     }
+                },
+                "representatives": {
+                    "type": "object",
+                    "description": "Per-cluster representative sampling for expert review",
+                    "properties": {
+                        "n_medoid":   { "type": "integer", "default": 3, "description": "Most-typical records per cluster (nearest centroid)" },
+                        "n_boundary": { "type": "integer", "default": 5, "description": "Most ambiguous records per cluster (smallest margin)" },
+                        "n_outlier":  { "type": "integer", "default": 3, "description": "Most anomalous records per cluster (far from all / noise)" }
+                    }
                 }
             }
         },
