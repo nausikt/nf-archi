@@ -1,5 +1,6 @@
-include { Cluster }  from '../../modules/bootstrapping/cluster.nf'
-include { Ensemble } from '../../modules/bootstrapping/ensemble.nf'
+include { Cluster }         from '../../modules/bootstrapping/cluster.nf'
+include { Ensemble }        from '../../modules/bootstrapping/ensemble.nf'
+include { Representatives } from '../../modules/bootstrapping/representatives.nf'
 
 workflow Clustering {
 
@@ -26,9 +27,11 @@ workflow Clustering {
 
     Cluster(ch_runs, ch_emb)
     Ensemble(Cluster.out.labels.collect())
+    Representatives(ch_emb, Ensemble.out.consensus)
 
     emit:
-    labels    = Cluster.out.labels
-    consensus = Ensemble.out.consensus
-    coassoc   = Ensemble.out.coassoc
+    labels          = Cluster.out.labels
+    consensus       = Ensemble.out.consensus
+    coassoc         = Ensemble.out.coassoc
+    representatives = Representatives.out.representatives
 }
