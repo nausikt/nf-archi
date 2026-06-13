@@ -66,6 +66,12 @@
                     "properties": {
                         "runs": { "type": "string", "description": "Path to ensemble runs JSON" },
                         "seed": { "type": "integer", "default": 42 },
+                        "metric_space": {
+                            "type": "string",
+                            "enum": ["euclidean", "cosine"],
+                            "default": "euclidean",
+                            "description": "Input vector space: 'euclidean' for reduced UMAP coords (no re-normalization), 'cosine' to L2-normalize raw embeddings"
+                        },
                         "grid": {
                             "type": ["object", "null"],
                             "default": null,
