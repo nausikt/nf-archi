@@ -38,6 +38,7 @@ workflow BootstrappingDataset {
     // umap3 is the separate viz space for the dashboard.
     Reduce(Embed.out.embeddings)
     ch_reduced = Reduce.out.reduced.first()
+    ch_umap3   = Reduce.out.umap3.first()    // viz space (anchor/sample placement)
 
     Clustering(ch_reduced, params.cluster.runs)
 
@@ -49,7 +50,8 @@ workflow BootstrappingDataset {
             ch_embeddings,
             Anchors.out.anchors.first(),
             Anchors.out.meta.first(),
-            Clustering.out.consensus.first()
+            Clustering.out.consensus.first(),
+            ch_umap3
         )
     }
 }
