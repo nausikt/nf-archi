@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 process Ensemble {
 
     tag "consensus"
@@ -9,17 +11,28 @@ process Ensemble {
 
     input:
     path label_files
+    path metric_files
 
     output:
-    path "ensemble.parquet", emit: consensus
-    path "coassoc.parquet",  emit: coassoc
+    path "ensemble.parquet",     emit: consensus
+    path "coassoc.parquet",      emit: coassoc
+    path "member_weights.json",  emit: weights
 
     script:
+    def mw = params.ensemble.member_weights
+    def overrides = JsonOutput.toJson(mw instanceof Map ? mw : [:])
     """
     ensemble.py \\
         --inputs ${label_files} \\
+        --metrics ${metric_files} \\
         --output ensemble.parquet \\
         --coassoc coassoc.parquet \\
-        --threshold ${params.cluster.consensus_threshold}
+        --weights member_weights.json \\
+        --threshold ${params.ensemble.threshold} \\
+        --weight-mode ${params.ensemble.weight} \\
+        --min-clusters ${params.ensemble.auto.min_clusters} \\
+        --max-noise ${params.ensemble.auto.max_noise} \\
+        --max-dominance ${params.ensemble.auto.max_dominance} \\
+        --overrides '${overrides}'
     """
 }

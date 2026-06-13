@@ -76,11 +76,37 @@
                             "type": ["object", "null"],
                             "default": null,
                             "description": "Hyperparameter grid; when set, overrides runs.json. Keys hdbscan|kmeans|agglomerative -> {param: [values]}. Deep-validated against schemas/cluster/grid.json"
-                        },
-                        "consensus_threshold": {
+                        }
+                    }
+                },
+                "ensemble": {
+                    "type": "object",
+                    "description": "Weighted evidence-accumulation consensus (semi-automatic)",
+                    "properties": {
+                        "threshold": {
                             "type": "number",
                             "default": 0.5,
                             "description": "Min mean co-association for samples to stay in the same consensus cluster"
+                        },
+                        "weight": {
+                            "type": "string",
+                            "enum": ["silhouette", "uniform"],
+                            "default": "silhouette",
+                            "description": "Base soft-vote weight for a kept member"
+                        },
+                        "auto": {
+                            "type": "object",
+                            "description": "Tier-0 auto-drop policy (degenerate member -> weight 0)",
+                            "properties": {
+                                "min_clusters":  { "type": "integer", "default": 2, "description": "Members with fewer clusters are dropped" },
+                                "max_noise":     { "type": "number",  "default": 0.6, "description": "Members noisier than this are dropped" },
+                                "max_dominance": { "type": "number",  "default": 0.9, "description": "Members whose largest cluster exceeds this fraction are dropped" }
+                            }
+                        },
+                        "member_weights": {
+                            "type": "object",
+                            "default": {},
+                            "description": "Human override of resolved weights, keyed by run name (wins over auto-drop)"
                         }
                     }
                 },
