@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Chained dimensionality reduction: PCA -> UMAP.
 
-One shared PCA pre-reduction feeds two UMAP projections:
-  - clustering space: UMAP(n_components, min_dist~0.0) -> reduced.parquet
-      (vector kept in column 'embedding' so Cluster stays space-agnostic)
-  - viz space:        UMAP(3, min_dist~0.1)            -> umap3.parquet (x, y, z)
+One shared PCA pre-reduction feeds up to two independent UMAP projections
+(emit whichever the caller asks for; this lets the workflow grid the clustering
+space across many recipes while producing the viz space only for the primary):
+  - clustering space: UMAP(n_components, min_dist~0.0) -> --reduced (col 'embedding')
+  - viz space:        UMAP(3, min_dist~0.1)            -> --umap3 (x, y, z)
 
 PCA denoises and shrinks the ambient dimension so UMAP's kNN graph is built on
 meaningful distances (mitigates high-dim distance concentration).
@@ -37,8 +38,8 @@ def umap_reduce(Xp, n_components, n_neighbors, min_dist, seed):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True)
-    ap.add_argument("--reduced", required=True)
-    ap.add_argument("--umap3", required=True)
+    ap.add_argument("--reduced", default=None)                  # clustering-space output
+    ap.add_argument("--umap3", default=None)                    # viz-space output
     ap.add_argument("--pca-components", type=int, default=50)
     ap.add_argument("--n-components", type=int, default=10)     # clustering space dim
     ap.add_argument("--n-neighbors", type=int, default=10)
@@ -48,34 +49,40 @@ def main():
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
+    if not args.reduced and not args.umap3:
+        ap.error("nothing to do: pass --reduced and/or --umap3")
+
     table = pq.read_table(args.input)
     ids = table.column("sample_id").to_pylist()
     X = np.asarray(table.column("embedding").to_pylist(), dtype=np.float32)
 
     Xp, pca_n = pca_reduce(X, args.pca_components, args.seed)
+    done = []
 
-    # clustering space: tight (min_dist~0) to preserve density for HDBSCAN
-    cl = umap_reduce(Xp, args.n_components, args.n_neighbors, args.min_dist, args.seed)
-    params = f"pca{pca_n}_umap{args.n_components}_nn{args.n_neighbors}_md{args.min_dist}"
-    pq.write_table(pa.table({
-        "sample_id": pa.array(ids, pa.string()),
-        "embedding": pa.array(cl.astype(np.float32).tolist(), pa.list_(pa.float32())),
-        "method":    pa.array(["pca+umap"] * len(ids), pa.string()),
-        "params":    pa.array([params] * len(ids), pa.string()),
-    }), args.reduced)
+    if args.reduced:
+        # clustering space: tight (min_dist~0) to preserve density for HDBSCAN
+        cl = umap_reduce(Xp, args.n_components, args.n_neighbors, args.min_dist, args.seed)
+        params = f"pca{pca_n}_umap{args.n_components}_nn{args.n_neighbors}_md{args.min_dist}"
+        pq.write_table(pa.table({
+            "sample_id": pa.array(ids, pa.string()),
+            "embedding": pa.array(cl.astype(np.float32).tolist(), pa.list_(pa.float32())),
+            "method":    pa.array(["pca+umap"] * len(ids), pa.string()),
+            "params":    pa.array([params] * len(ids), pa.string()),
+        }), args.reduced)
+        done.append(f"UMAP{args.n_components} (cluster, md={args.min_dist}) -> {args.reduced}")
 
-    # viz space: spread (min_dist~0.1), exactly 3D for the dashboard
-    viz = umap_reduce(Xp, 3, args.viz_n_neighbors, args.viz_min_dist, args.seed)
-    pq.write_table(pa.table({
-        "sample_id": pa.array(ids, pa.string()),
-        "x": pa.array(viz[:, 0].astype(np.float32).tolist(), pa.float32()),
-        "y": pa.array(viz[:, 1].astype(np.float32).tolist(), pa.float32()),
-        "z": pa.array(viz[:, 2].astype(np.float32).tolist(), pa.float32()),
-    }), args.umap3)
+    if args.umap3:
+        # viz space: spread (min_dist~0.1), exactly 3D for the dashboard
+        viz = umap_reduce(Xp, 3, args.viz_n_neighbors, args.viz_min_dist, args.seed)
+        pq.write_table(pa.table({
+            "sample_id": pa.array(ids, pa.string()),
+            "x": pa.array(viz[:, 0].astype(np.float32).tolist(), pa.float32()),
+            "y": pa.array(viz[:, 1].astype(np.float32).tolist(), pa.float32()),
+            "z": pa.array(viz[:, 2].astype(np.float32).tolist(), pa.float32()),
+        }), args.umap3)
+        done.append(f"UMAP3 (viz, md={args.viz_min_dist}) -> {args.umap3}")
 
-    print(f"[reduce] {tuple(X.shape)} -> PCA{pca_n} -> "
-          f"UMAP{args.n_components} (cluster, md={args.min_dist}) + UMAP3 (viz, md={args.viz_min_dist}) "
-          f"-> {args.reduced}, {args.umap3}")
+    print(f"[reduce] {tuple(X.shape)} -> PCA{pca_n} -> " + "; ".join(done))
 
 
 if __name__ == "__main__":

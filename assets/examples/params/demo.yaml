@@ -1,3 +1,7 @@
+reduce:
+  grid:
+    n_components: [5, 10]
+    n_neighbors:  [5, 10, 30, 50]
 # Experiment payload for the full bootstrapping demo (pure data, no paths).
 # Structural params (workflow, input) come from the demo_bootstrapping profile:
 #   nextflow run . -profile demo_bootstrapping,conda -params-file assets/examples/params/demo.yaml

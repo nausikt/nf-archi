@@ -5,7 +5,8 @@ include { Representatives } from '../../modules/bootstrapping/representatives.nf
 workflow Clustering {
 
     take:
-    embeddings        // single-item channel: embeddings.parquet
+    variants          // channel of tuple(reduction_name, reduced_file) — one or many
+    primary           // value: primary reduced file (representatives geometry)
     runs_file         // value: path to runs.json (fallback when no grid)
 
     main:
@@ -22,17 +23,22 @@ workflow Clustering {
     runs.each { SchemaValidator.validate(it, 'schemas/cluster/run.json') }
     assert runs*.name.unique().size() == runs.size() : "Duplicate run names: ${runs*.name}"
 
-    ch_runs = Channel.fromList(runs)
-    ch_emb  = embeddings.first()
+    // Cartesian: every clustering run on every reduction variant becomes one
+    // ensemble member, named <reduction>__<cluster>. Evidence accumulation then
+    // makes the consensus robust to the reduction choice too.
+    ch_members = Channel.fromList(runs)
+        .combine(variants)
+        .map { run, rname, rfile ->
+            tuple(run + [ name: "${rname}__${run.name}".toString() ], rfile) }
 
-    Cluster(ch_runs, ch_emb)
+    Cluster(ch_members)
 
     // Deterministic order into Ensemble: collect() emits in task-completion
     // order (nondeterministic), which would change the staged file list and
     // thrash Ensemble's cache on every -resume. toSortedList() pins the order
     // so Ensemble caches whenever its inputs/params are unchanged.
     Ensemble(Cluster.out.labels.toSortedList(), Cluster.out.metrics.toSortedList())
-    Representatives(ch_emb, Ensemble.out.consensus)
+    Representatives(primary, Ensemble.out.consensus)
 
     // per-member quality metrics -> one JSONL artifact (raw inputs to weighting)
     ch_member_metrics = Cluster.out.metrics

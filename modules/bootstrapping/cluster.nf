@@ -10,8 +10,7 @@ process Cluster {
     publishDir "${params.outdir}/bootstrapping/clusters", mode: 'copy'
 
     input:
-    val  run
-    path embeddings
+    tuple val(run), path(embeddings)
 
     output:
     path "cluster_${run.name}.parquet", emit: labels

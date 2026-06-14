@@ -2,7 +2,7 @@ include { validateParameters } from 'plugin/nf-schema'
 include { LoadQueries        } from '../subworkflows/io/load_queries.nf'
 include { CollectDataset } from '../subworkflows/io/collect_dataset.nf'
 include { Embed } from '../modules/bootstrapping/embed.nf'
-include { Reduce } from '../modules/bootstrapping/reduce.nf'
+include { Reduction } from '../subworkflows/bootstrapping/reduction.nf'
 include { Clustering } from '../subworkflows/bootstrapping/clustering.nf'
 include { Anchors } from '../subworkflows/bootstrapping/anchors.nf'
 include { AssignAnchors } from '../modules/bootstrapping/assign_anchors.nf'
@@ -34,13 +34,13 @@ workflow BootstrappingDataset {
         tuple(ds, 'embeddings.parquet', params.embed.text_fields.join(',')) })
     ch_embeddings = Embed.out.embeddings.first()   // raw space (anchor comparisons)
 
-    // PCA -> UMAP: clustering on the low-dim space fixes high-dim sparsity;
-    // umap3 is the separate viz space for the dashboard.
-    Reduce(Embed.out.embeddings)
-    ch_reduced = Reduce.out.reduced.first()
-    ch_umap3   = Reduce.out.umap3.first()    // viz space (anchor/sample placement)
+    // PCA -> UMAP: clustering on the low-dim space fixes high-dim sparsity.
+    // Gridable: each reduction variant x each clustering run = one ensemble
+    // member; the primary variant supplies the geometry + viz (umap3) space.
+    Reduction(Embed.out.embeddings)
+    ch_umap3 = Reduction.out.umap3.first()    // viz space (anchor/sample placement)
 
-    Clustering(ch_reduced, params.cluster.runs)
+    Clustering(Reduction.out.variants, Reduction.out.primary, params.cluster.runs)
 
     // Optional pre-labeling overlay: rank user-prior anchors against each
     // sample (and each consensus cluster) for the expert's first pass.
