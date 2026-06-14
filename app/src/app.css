@@ -1,2 +1,18 @@
-html, body { margin: 0; height: 100%; }
+html, body { margin: 0; height: 100%; background: #0b0e14; color: #e6e9ef; }
 #app { height: 100vh; }
+
+/* Svelte Flow dark theme: brighten default node text/borders */
+.svelte-flow.dark .svelte-flow__node-default,
+.svelte-flow.dark .svelte-flow__node-input,
+.svelte-flow.dark .svelte-flow__node-output {
+  background: #161b26;
+  color: #e6e9ef;
+  border-color: #2a3140;
+}
+.svelte-flow.dark .svelte-flow__edge-path { stroke: #6b7689; }
+.svelte-flow.dark .svelte-flow__controls-button {
+  background: #161b26;
+  border-bottom: 1px solid #2a3140;
+  color: #e6e9ef;
+  fill: #e6e9ef;
+}

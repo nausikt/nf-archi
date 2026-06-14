@@ -4,6 +4,9 @@ node_modules/
 # build output
 dist/
 
+# data symlink -> ../../results/bootstrapping (generated pipeline outputs)
+public/data
+
 # vite cache
 .vite/
 
