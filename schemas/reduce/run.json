@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "reduce_run.json",
+    "title": "Reduction Run",
+    "description": "One PCA->UMAP recipe = one clustering-space variant (an ensemble axis).",
+    "type": "object",
+    "properties": {
+        "name":           { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_]+$" },
+        "pca_components": { "type": "integer", "minimum": 2 },
+        "n_components":   { "type": "integer", "minimum": 2 },
+        "n_neighbors":    { "type": "integer", "minimum": 2 },
+        "min_dist":       { "type": "number",  "minimum": 0 }
+    },
+    "required": ["name", "pca_components", "n_components", "n_neighbors", "min_dist"],
+    "additionalProperties": false
+}

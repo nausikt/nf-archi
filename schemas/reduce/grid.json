@@ -1,0 +1,15 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "reduce_grid.json",
+    "title": "Reduction Hyperparameter Grid",
+    "description": "Axes; flat cross-product expands into reduce_run.json variants. Unspecified axes fall back to the scalar params.reduce defaults.",
+    "type": "object",
+    "minProperties": 1,
+    "additionalProperties": false,
+    "properties": {
+        "pca_components": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 2 } },
+        "n_components":   { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 2 } },
+        "n_neighbors":    { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 2 } },
+        "min_dist":       { "type": "array", "minItems": 1, "items": { "type": "number",  "minimum": 0 } }
+    }
+}
