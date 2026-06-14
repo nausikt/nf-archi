@@ -12,7 +12,7 @@ process AssignAnchors {
     path anchors
     path anchor_meta
     path ensemble
-    path umap3
+    path umap2
 
     output:
     path "prelabels.parquet",          emit: prelabels
@@ -27,7 +27,7 @@ process AssignAnchors {
         --anchors ${anchors} \\
         --anchor-meta ${anchor_meta} \\
         --ensemble ${ensemble} \\
-        --umap3 ${umap3} \\
+        --umap2 ${umap2} \\
         --top-k ${params.assign.top_k} \\
         --prelabels prelabels.parquet \\
         --cluster-suggestions cluster_suggestions.json \\

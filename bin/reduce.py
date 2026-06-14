@@ -5,7 +5,7 @@ One shared PCA pre-reduction feeds up to two independent UMAP projections
 (emit whichever the caller asks for; this lets the workflow grid the clustering
 space across many recipes while producing the viz space only for the primary):
   - clustering space: UMAP(n_components, min_dist~0.0) -> --reduced (col 'embedding')
-  - viz space:        UMAP(3, min_dist~0.1)            -> --umap3 (x, y, z)
+  - viz space:        UMAP(2, min_dist~0.1)            -> --umap2 (x, y)
 
 PCA denoises and shrinks the ambient dimension so UMAP's kNN graph is built on
 meaningful distances (mitigates high-dim distance concentration).
@@ -39,7 +39,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True)
     ap.add_argument("--reduced", default=None)                  # clustering-space output
-    ap.add_argument("--umap3", default=None)                    # viz-space output
+    ap.add_argument("--umap2", default=None)                    # viz-space output
     ap.add_argument("--pca-components", type=int, default=50)
     ap.add_argument("--n-components", type=int, default=10)     # clustering space dim
     ap.add_argument("--n-neighbors", type=int, default=10)
@@ -49,8 +49,8 @@ def main():
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
-    if not args.reduced and not args.umap3:
-        ap.error("nothing to do: pass --reduced and/or --umap3")
+    if not args.reduced and not args.umap2:
+        ap.error("nothing to do: pass --reduced and/or --umap2")
 
     table = pq.read_table(args.input)
     ids = table.column("sample_id").to_pylist()
@@ -71,16 +71,15 @@ def main():
         }), args.reduced)
         done.append(f"UMAP{args.n_components} (cluster, md={args.min_dist}) -> {args.reduced}")
 
-    if args.umap3:
-        # viz space: spread (min_dist~0.1), exactly 3D for the dashboard
-        viz = umap_reduce(Xp, 3, args.viz_n_neighbors, args.viz_min_dist, args.seed)
+    if args.umap2:
+        # viz space: spread (min_dist~0.1), 2D for the dashboard
+        viz = umap_reduce(Xp, 2, args.viz_n_neighbors, args.viz_min_dist, args.seed)
         pq.write_table(pa.table({
             "sample_id": pa.array(ids, pa.string()),
             "x": pa.array(viz[:, 0].astype(np.float32).tolist(), pa.float32()),
             "y": pa.array(viz[:, 1].astype(np.float32).tolist(), pa.float32()),
-            "z": pa.array(viz[:, 2].astype(np.float32).tolist(), pa.float32()),
-        }), args.umap3)
-        done.append(f"UMAP3 (viz, md={args.viz_min_dist}) -> {args.umap3}")
+        }), args.umap2)
+        done.append(f"UMAP2 (viz, md={args.viz_min_dist}) -> {args.umap2}")
 
     print(f"[reduce] {tuple(X.shape)} -> PCA{pca_n} -> " + "; ".join(done))
 
