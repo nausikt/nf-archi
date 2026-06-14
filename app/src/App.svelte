@@ -14,10 +14,10 @@
     {
       id: 'umap',
       type: 'cosmograph',
-      position: { x: 200, y: 320 },
-      width: 560,
-      height: 420,
-      data: {},
+      position: { x: 120, y: 300 },
+      width: 1000,
+      height: 640,
+      data: { view: 'reconcile' },   // After Ensemble · Reconcile embedding view
     },
   ]);
   let edges = $state<Edge[]>([
