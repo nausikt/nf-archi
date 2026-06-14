@@ -1,6 +1,11 @@
 include { validateParameters } from 'plugin/nf-schema'
 include { LoadQueries        } from '../subworkflows/io/load_queries.nf'
-include { Clustering         } from '../modules/bootstrapping/clustering.nf'
+include { CollectDataset } from '../subworkflows/io/collect_dataset.nf'
+include { Embed } from '../modules/bootstrapping/embed.nf'
+include { Reduction } from '../subworkflows/bootstrapping/reduction.nf'
+include { Clustering } from '../subworkflows/bootstrapping/clustering.nf'
+include { Anchors } from '../subworkflows/bootstrapping/anchors.nf'
+include { AssignAnchors } from '../modules/bootstrapping/assign_anchors.nf'
 
 workflow BootstrappingDataset {
 
@@ -23,5 +28,30 @@ workflow BootstrappingDataset {
     //     "▶  [${meta.sample_id}] ${meta.batch} — ${record.question}"
     // }
 
-    Clustering(LoadQueries.out.records)
+    CollectDataset(LoadQueries.out.records, params.outdir)
+
+    Embed(CollectDataset.out.dataset.map { ds ->
+        tuple(ds, 'embeddings.parquet', params.embed.text_fields.join(',')) })
+    ch_embeddings = Embed.out.embeddings.first()   // raw space (anchor comparisons)
+
+    // PCA -> UMAP: clustering on the low-dim space fixes high-dim sparsity.
+    // Gridable: each reduction variant x each clustering run = one ensemble
+    // member; the primary variant supplies the geometry + viz (umap3) space.
+    Reduction(Embed.out.embeddings)
+    ch_umap3 = Reduction.out.umap3.first()    // viz space (anchor/sample placement)
+
+    Clustering(Reduction.out.variants, Reduction.out.primary, params.cluster.runs)
+
+    // Optional pre-labeling overlay: rank user-prior anchors against each
+    // sample (and each consensus cluster) for the expert's first pass.
+    if( params.anchors?.categories || params.anchors?.tags || params.anchors?.flags ) {
+        Anchors(params.outdir)
+        AssignAnchors(
+            ch_embeddings,
+            Anchors.out.anchors.first(),
+            Anchors.out.meta.first(),
+            Clustering.out.consensus.first(),
+            ch_umap3
+        )
+    }
 }

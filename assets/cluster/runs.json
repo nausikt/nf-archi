@@ -1,0 +1,6 @@
+[
+  {"name": "hdbscan_mcs3", "algorithm": "hdbscan", "min_cluster_size": 3},
+  {"name": "hdbscan_mcs5", "algorithm": "hdbscan", "min_cluster_size": 5},
+  {"name": "kmeans_k4",    "algorithm": "kmeans",  "n_clusters": 4},
+  {"name": "agg_k4",       "algorithm": "agglomerative", "n_clusters": 4, "linkage": "average", "metric": "cosine"}
+]

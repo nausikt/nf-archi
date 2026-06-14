@@ -1,0 +1,33 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "cluster_grid.json",
+    "title": "Clustering Hyperparameter Grid",
+    "description": "Per-algorithm axes; cross-product expands into cluster_run.json members.",
+    "type": "object",
+    "minProperties": 1,
+    "additionalProperties": false,
+    "properties": {
+        "hdbscan": {
+            "type": "object", "additionalProperties": false, "required": ["min_cluster_size"],
+            "properties": {
+                "min_cluster_size": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 2 } },
+                "min_samples":      { "type": "array", "minItems": 1, "items": { "type": ["integer", "null"], "minimum": 1 } }
+            }
+        },
+        "kmeans": {
+            "type": "object", "additionalProperties": false, "required": ["n_clusters"],
+            "properties": {
+                "n_clusters": { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 2 } }
+            }
+        },
+        "agglomerative": {
+            "type": "object", "additionalProperties": false,
+            "properties": {
+                "n_clusters":         { "type": "array", "minItems": 1, "items": { "type": "integer", "minimum": 2 } },
+                "distance_threshold": { "type": "array", "minItems": 1, "items": { "type": "number", "minimum": 0 } },
+                "linkage":            { "type": "array", "minItems": 1, "items": { "enum": ["average", "complete", "single", "ward"] } },
+                "metric":             { "type": "array", "minItems": 1, "items": { "type": "string" } }
+            }
+        }
+    }
+}

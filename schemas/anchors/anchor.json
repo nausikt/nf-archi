@@ -1,0 +1,15 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "anchor.json",
+    "title": "Taxonomy Anchor",
+    "description": "One user prior: a category, tag, or flag whose definition is embedded as an anchor vector.",
+    "type": "object",
+    "properties": {
+        "id":         { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_]+$" },
+        "kind":       { "type": "string", "enum": ["category", "tag", "flag"] },
+        "name":       { "type": "string", "minLength": 1 },
+        "definition": { "type": "string", "minLength": 1 }
+    },
+    "required": ["id", "kind", "name", "definition"],
+    "additionalProperties": false
+}
