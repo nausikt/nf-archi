@@ -23,5 +23,6 @@
             "enum": ["discourse", "mattermost"]
         }
     },
-    "required": []
+    "required": [],
+    "unevaluatedProperties": false
 }
