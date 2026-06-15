@@ -9,12 +9,14 @@
 import type { Component } from 'svelte';
 import ExplorePanel from './explore/ExplorePanel.svelte';
 import ClusteringPanel from './clustering/ClusteringPanel.svelte';
+import SampledPanel from './sampled/SampledPanel.svelte';
 
 export const DEFAULT_VIEW = 'explore';
 
 export const panels: Record<string, Component> = {
   explore: ExplorePanel,
   clustering: ClusteringPanel,
+  sampled: SampledPanel,
 };
 
 export function resolvePanel(view?: string): Component {

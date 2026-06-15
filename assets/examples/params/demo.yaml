@@ -17,6 +17,11 @@ cluster:
       linkage: [average]
       metric: [cosine]
 
+representatives:
+  n_medoid: 3
+  n_boundary: 5     # the ambiguous review queue — usually want more
+  n_outlier: 3
+
 anchors:
   # ── Categories: WHAT KIND of question (intent) ───────────────────────────
   # Mutually exclusive — every record gets exactly one category.

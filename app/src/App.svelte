@@ -15,13 +15,15 @@
     width: 1100, height: 640,
     data: { view: v, title },
   });
-  // grid comes first in the pipeline (reduce -> cluster), so it sits on the left
+  // pipeline order, left -> right: reduce/cluster grid, explore, sampled
   const clusteringNode = (y: number) =>
     view('grid', 0, y, 'clustering', 'Reduce · Clustering : hyperparameter grid view');
   const exploreNode = (y: number) =>
     view('umap', 1160, y, 'explore', 'UMAP2 : explore embedding space view');
+  const sampledNode = (y: number) =>
+    view('sampled', 2320, y, 'sampled', 'Sampled : representatives over embedding space');
 
-  let nodes = $state<Node[]>([exploreNode(360), clusteringNode(360)]);
+  let nodes = $state<Node[]>([clusteringNode(360), exploreNode(360), sampledNode(360)]);
   let edges = $state<Edge[]>([]);
 
   $effect(() => {
@@ -31,21 +33,22 @@
       if (!alive || !dag) return;   // no run yet -> just the embedding views
 
       const maxY = Math.max(0, ...dag.nodes.map(n => n.position.y));
-      const umap = exploreNode(maxY + 220);
       const grid = clusteringNode(maxY + 220);
+      const umap = exploreNode(maxY + 220);
+      const sampled = sampledNode(maxY + 220);
 
       // Wire each view from the producing DAG stage (else a sink).
       const sink = dag.nodes.find(n => !dag.edges.some(e => e.source === n.id));
       const byLabel = (l: string) => dag.nodes.find(n => (n.data?.label as string) === l);
-      const fromEnsemble = byLabel('Ensemble') ?? sink;
       const fromCluster = byLabel('Cluster') ?? byLabel('Ensemble') ?? sink;
+      const fromEnsemble = byLabel('Ensemble') ?? sink;
+      const fromReps = byLabel('Representatives') ?? fromEnsemble;
 
-      const extra: Edge[] = [];
-      if (fromEnsemble) extra.push({ id: `e_${fromEnsemble.id}_umap`, source: fromEnsemble.id, target: 'umap', animated: true });
-      if (fromCluster) extra.push({ id: `e_${fromCluster.id}_grid`, source: fromCluster.id, target: 'grid', animated: true });
+      const wire = (from: typeof sink, target: string): Edge[] =>
+        from ? [{ id: `e_${from.id}_${target}`, source: from.id, target, animated: true }] : [];
 
-      nodes = [...dag.nodes, umap, grid];
-      edges = [...dag.edges, ...extra];
+      nodes = [...dag.nodes, grid, umap, sampled];
+      edges = [...dag.edges, ...wire(fromCluster, 'grid'), ...wire(fromEnsemble, 'umap'), ...wire(fromReps, 'sampled')];
     })();
     return () => { alive = false; };
   });
