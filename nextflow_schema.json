@@ -52,7 +52,7 @@
                         "min_dist":       { "type": "number",  "default": 0.0, "description": "Clustering-space UMAP packing (0 = tight, density-preserving)" },
                         "viz": {
                             "type": "object",
-                            "description": "Viz-space UMAP (3D)",
+                            "description": "Viz-space UMAP (2D)",
                             "properties": {
                                 "n_neighbors": { "type": "integer", "default": 15 },
                                 "min_dist":    { "type": "number",  "default": 0.1 }

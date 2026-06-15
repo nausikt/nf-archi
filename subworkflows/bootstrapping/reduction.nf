@@ -44,5 +44,5 @@ workflow Reduction {
     emit:
     variants = Reduce.out.reduced     // tuple(name, reduced_file) — one or many
     primary  = ch_primary             // value: primary reduced file (geometry)
-    umap3    = ReduceViz.out.umap3
+    umap2    = ReduceViz.out.umap2
 }

@@ -36,9 +36,9 @@ workflow BootstrappingDataset {
 
     // PCA -> UMAP: clustering on the low-dim space fixes high-dim sparsity.
     // Gridable: each reduction variant x each clustering run = one ensemble
-    // member; the primary variant supplies the geometry + viz (umap3) space.
+    // member; the primary variant supplies the geometry + viz (umap2) space.
     Reduction(Embed.out.embeddings)
-    ch_umap3 = Reduction.out.umap3.first()    // viz space (anchor/sample placement)
+    ch_umap2 = Reduction.out.umap2.first()    // viz space (anchor/sample placement)
 
     Clustering(Reduction.out.variants, Reduction.out.primary, params.cluster.runs)
 
@@ -51,7 +51,7 @@ workflow BootstrappingDataset {
             Anchors.out.anchors.first(),
             Anchors.out.meta.first(),
             Clustering.out.consensus.first(),
-            ch_umap3
+            ch_umap2
         )
     }
 }

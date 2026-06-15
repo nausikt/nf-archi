@@ -28,7 +28,7 @@ process Reduce {
     """
 }
 
-// Viz space (3D) for the dashboard — built once, from the primary reduction.
+// Viz space (2D) for the dashboard — built once, from the primary reduction.
 process ReduceViz {
 
     tag "viz"
@@ -43,13 +43,13 @@ process ReduceViz {
     path embeddings
 
     output:
-    path "umap3.parquet", emit: umap3
+    path "umap2.parquet", emit: umap2
 
     script:
     """
     reduce.py \\
         --input ${embeddings} \\
-        --umap3 umap3.parquet \\
+        --umap2 umap2.parquet \\
         --pca-components ${spec.pca_components} \\
         --viz-n-neighbors ${params.reduce.viz.n_neighbors} \\
         --viz-min-dist ${params.reduce.viz.min_dist} \\

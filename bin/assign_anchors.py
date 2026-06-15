@@ -7,11 +7,11 @@ against the consensus centroid (the reconcile view). Ranking within kind keeps
 the mutually-exclusive categories from being crowded out by the many tags/flags.
 
 All similarity is computed in the RAW embedding space (where the model is
-calibrated). umap3 is borrowed only for *placement* on the dashboard:
-  - points.parquet        (A): per-sample drawing row = umap3 (x,y,z) + the top-1
+calibrated). umap2 is borrowed only for *placement* on the dashboard:
+  - points.parquet        (A): per-sample drawing row = umap2 (x,y) + the top-1
                                anchor per kind + consensus/stability, so dots can
                                be colored by their assignment.
-  - anchor_points.parquet (B): each anchor placed at the centroid (in umap3) of
+  - anchor_points.parquet (B): each anchor placed at the centroid (in umap2) of
                                the samples that pick it #1 within its kind; an
                                anchor nobody picks falls back to its top-k nearest
                                samples by raw cosine.
@@ -32,10 +32,10 @@ def load_vectors(path):
     return ids, X
 
 
-def load_umap3(path, order):
-    """umap3 (x,y,z) aligned to `order` -> [n_samples x 3]."""
+def load_umap2(path, order):
+    """umap2 (x,y) aligned to `order` -> [n_samples x 2]."""
     t = pq.read_table(path).to_pandas().set_index("sample_id").reindex(order)
-    return t[["x", "y", "z"]].to_numpy(dtype=np.float32)
+    return t[["x", "y"]].to_numpy(dtype=np.float32)
 
 
 def read_jsonl(path):
@@ -55,7 +55,7 @@ def main():
     ap.add_argument("--anchors", required=True)
     ap.add_argument("--anchor-meta", required=True)
     ap.add_argument("--ensemble", required=True)
-    ap.add_argument("--umap3", required=True)
+    ap.add_argument("--umap2", required=True)
     ap.add_argument("--top-k", type=int, default=3)
     ap.add_argument("--prelabels", required=True)
     ap.add_argument("--cluster-suggestions", required=True)
@@ -120,13 +120,13 @@ def main():
     with open(args.cluster_suggestions, "w") as fh:
         json.dump(clusters, fh, indent=2)
 
-    # ---- A: per-sample drawing table (umap3 coords + top-1 anchor per kind) ----
-    V = load_umap3(args.umap3, s_ids)
+    # ---- A: per-sample drawing table (umap2 coords + top-1 anchor per kind) ----
+    V = load_umap2(args.umap2, s_ids)
     top1 = {kind: np.asarray(idxs)[sims[:, idxs].argmax(axis=1)]
             for kind, idxs in kinds.items()}
     points = {
         "sample_id":       s_ids,
-        "x": V[:, 0], "y": V[:, 1], "z": V[:, 2],
+        "x": V[:, 0], "y": V[:, 1],
         "consensus_label": cons.astype(int),
         "stability":       stab.astype(np.float32),
     }
@@ -135,7 +135,7 @@ def main():
         points[f"top_{kind}_score"] = [float(sims[si, ai]) for si, ai in enumerate(best_ai)]
     pq.write_table(pa.Table.from_pandas(pd.DataFrame(points), preserve_index=False), args.points)
 
-    # ---- B: anchor markers = centroid (in umap3) of samples that pick it #1 ----
+    # ---- B: anchor markers = centroid (in umap2) of samples that pick it #1 ----
     support = {ai: [] for ai in range(len(a_ids))}
     for best_ai in top1.values():
         for si, ai in enumerate(best_ai):
@@ -151,7 +151,7 @@ def main():
             "anchor_id":   aid,
             "anchor_kind": meta.get(aid, {}).get("kind", "unknown"),
             "anchor_name": meta.get(aid, {}).get("name"),
-            "x": float(c[0]), "y": float(c[1]), "z": float(c[2]),
+            "x": float(c[0]), "y": float(c[1]),
             "n_support":   len(members),
             "placement":   placement,
         })
