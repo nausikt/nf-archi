@@ -22,6 +22,23 @@ representatives:
   n_boundary: 3     # the ambiguous review queue — usually want more
   n_outlier: 2
 
+argilla:
+  enabled: true
+  version: v0.0.1
+  workspace: archi-crab-bootstrap
+  overwrite: true
+
+# Final hop — push the review queue to your own Argilla. Off by default (needs a
+# live instance + anchors). Bring your own url/key:
+#   export ARGILLA_API_URL=https://my-argilla   ARGILLA_API_KEY=...
+# Dataset is archi-bootstrap-<version>; bump version each expert pass.
+# argilla:
+#   enabled: true
+#   workspace: argilla
+#   version: v0.0.1          # iterative: v0.0.2, v0.0.3, ...
+#   scope: representatives   # or 'all'
+#   overwrite: true
+
 anchors:
   # ── Categories: WHAT KIND of question (intent) ───────────────────────────
   # Mutually exclusive — every record gets exactly one category.

@@ -140,6 +140,20 @@
                         "n_boundary": { "type": "integer", "default": 5, "description": "Most ambiguous records per cluster (smallest margin)" },
                         "n_outlier":  { "type": "integer", "default": 3, "description": "Most anomalous records per cluster (far from all / noise)" }
                     }
+                },
+                "argilla": {
+                    "type": "object",
+                    "description": "Argilla export of prelabels + representatives as a review queue (opt-in; bring-your-own instance, api key via $ARGILLA_API_KEY)",
+                    "properties": {
+                        "enabled":    { "type": "boolean", "default": false, "description": "Run the export as the last bootstrapping step" },
+                        "api_url":    { "type": ["string", "null"], "default": null, "description": "Your Argilla server URL; falls back to $ARGILLA_API_URL" },
+                        "workspace":  { "type": "string", "default": "argilla", "description": "Target Argilla workspace" },
+                        "version":    { "type": "string", "default": "v0.0.1", "description": "Iterative review pass; dataset name = archi-bootstrap-<version>" },
+                        "scope":      { "type": "string", "enum": ["representatives", "all"], "default": "representatives", "description": "Export the review subset or every sample" },
+                        "top_k_tags": { "type": "integer", "default": 5, "description": "Ranked tag/flag suggestions kept per record" },
+                        "overwrite":  { "type": "boolean", "default": false, "description": "Replace the dataset if it already exists" },
+                        "dry_run":    { "type": "boolean", "default": false, "description": "Build + preview records without uploading" }
+                    }
                 }
             }
         },
