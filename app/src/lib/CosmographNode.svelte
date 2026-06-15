@@ -5,7 +5,7 @@
    * It is context-agnostic: the concrete panel is resolved from the registry by
    * `data.view`, so new contexts render here with no edits (Open/Closed).
    */
-  import { NodeResizer, type NodeProps } from '@xyflow/svelte';
+  import { NodeResizer, Handle, Position, type NodeProps } from '@xyflow/svelte';
   import { resolvePanel } from './views/registry';
 
   let { data, selected }: NodeProps = $props();
@@ -13,6 +13,7 @@
 </script>
 
 <NodeResizer minWidth={320} minHeight={240} isVisible={selected} color="#7eb6ff" />
+<Handle type="target" position={Position.Top} />
 <div class="cosmo-node">
   <Panel />
 </div>
