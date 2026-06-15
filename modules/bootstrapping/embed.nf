@@ -3,6 +3,9 @@ process Embed {
 
     tag "${out_name}"
 
+    // cap concurrent inferencing so the endpoint stays trackable / unsaturated
+    maxForks params.embed.max_forks
+
     conda     "${projectDir}/assets/env/embed.yml"
     container 'nf-archi-embed:0.1.0'
 

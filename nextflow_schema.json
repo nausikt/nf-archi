@@ -38,7 +38,8 @@
                         "endpoint":   { "type": "string",  "default": "http://submit76.mit.edu:7870"},
                         "model":      { "type": "string",  "default": "qwen3-embedding:8b" },
                         "text_fields": { "type": "array", "items": { "type": "string" }, "default": ["question", "answer"] },
-                        "batch_size": { "type": "integer", "default": 64 }
+                        "batch_size": { "type": "integer", "default": 64 },
+                        "max_forks":  { "type": "integer", "default": 4, "description": "Max concurrent embed chunks (one per input batch/month)" }
                     }
                 },
                 "reduce": {
