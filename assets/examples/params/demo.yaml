@@ -18,9 +18,9 @@ cluster:
       metric: [cosine]
 
 representatives:
-  n_medoid: 3
-  n_boundary: 5     # the ambiguous review queue — usually want more
-  n_outlier: 3
+  n_medoid: 2
+  n_boundary: 3     # the ambiguous review queue — usually want more
+  n_outlier: 2
 
 anchors:
   # ── Categories: WHAT KIND of question (intent) ───────────────────────────
