@@ -1,21 +1,21 @@
 <script lang="ts">
   /**
-   * "After Ensemble / Reconcile" embedding view (frozen).
+   * Explore embedding view (UMAP2) — frozen.
    *
    * Composes the generic CosmographCanvas with this context's overlay: the INFO
    * panel (clustering summary + many-to-many tag/flag/category distributions),
-   * the native search, and the clickable tag legend. All reconcile-specific data
+   * the native search, and the clickable tag legend. All explore-specific data
    * lives in ./model.ts; this file owns only presentation + interaction wiring.
    */
   import { CosmographSearch, CosmographTypeColorLegend, type Cosmograph } from '@cosmograph/cosmograph';
   import CosmographCanvas from '../../cosmograph/CosmographCanvas.svelte';
   import {
-    buildReconcileModel, summarize, distSingle, distMulti,
-    type ReconcileModel, type Bin,
+    buildExploreModel, summarize, distSingle, distMulti,
+    type ExploreModel, type Bin,
   } from './model';
 
   let cosmo = $state<Cosmograph>();
-  let model = $state<ReconcileModel>();
+  let model = $state<ExploreModel>();
   let error = $state<string>();
   let active = $state<string | undefined>(undefined); // "kind:value" highlighted
 
@@ -43,7 +43,7 @@
   // load the context model once
   $effect(() => {
     let alive = true;
-    buildReconcileModel()
+    buildExploreModel()
       .then((m) => { if (alive) model = m; })
       .catch((e) => { if (alive) error = (e as Error).message; });
     return () => { alive = false; };

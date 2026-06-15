@@ -1,5 +1,5 @@
 /**
- * Reconcile view model — the "After Ensemble / Reconcile" embedding context.
+ * Explore view model — the UMAP2 embedding-space exploration context.
  *
  * Pure data layer (no Svelte): turns the pipeline parquet outputs into a ready
  * Cosmograph config plus the derived view model (points, tag colors) the overlay
@@ -23,7 +23,7 @@ export type Pt = {
   [k: string]: unknown;
 };
 
-export interface ReconcileModel {
+export interface ExploreModel {
   config: CosmographConfig;
   pts: Pt[];
   tagColor: Map<string, string>;
@@ -48,7 +48,7 @@ function arraysByKind(pre: PrelabelRow[], kind: string): Map<string, string[]> {
   return out;
 }
 
-export async function buildReconcileModel(): Promise<ReconcileModel> {
+export async function buildExploreModel(): Promise<ExploreModel> {
   const [data, pre, anchorRows] = await Promise.all([
     loadPoints(), loadPrelabels(), loadAnchorPoints(),
   ]);

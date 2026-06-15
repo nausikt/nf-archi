@@ -6,7 +6,7 @@
    * config, fit the view once data is uploaded, tear down on unmount) and provide
    * a positioned container into which a context-specific overlay can render.
    *
-   * It knows nothing about tags, anchors, reconcile, etc. Context views supply a
+   * It knows nothing about tags, anchors, explore, etc. Context views supply a
    * `config` and read back the live instance through `bind:cosmo`.
    */
   import { Cosmograph, type CosmographConfig } from '@cosmograph/cosmograph';

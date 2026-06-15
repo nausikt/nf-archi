@@ -7,12 +7,12 @@
  * and register it here — the node and canvas stay untouched (Open/Closed).
  */
 import type { Component } from 'svelte';
-import ReconcilePanel from './reconcile/ReconcilePanel.svelte';
+import ExplorePanel from './explore/ExplorePanel.svelte';
 
-export const DEFAULT_VIEW = 'reconcile';
+export const DEFAULT_VIEW = 'explore';
 
 export const panels: Record<string, Component> = {
-  reconcile: ReconcilePanel,
+  explore: ExplorePanel,
 };
 
 export function resolvePanel(view?: string): Component {
