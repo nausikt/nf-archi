@@ -10,7 +10,7 @@
    * `config` and read back the live instance through `bind:cosmo`.
    */
   import { Cosmograph, type CosmographConfig } from '@cosmograph/cosmograph';
-  import type { Snippet } from 'svelte';
+  import { untrack, type Snippet } from 'svelte';
 
   let {
     config,
@@ -23,23 +23,35 @@
   } = $props();
 
   let el: HTMLDivElement;
+  let instance = $state<Cosmograph>();
+  let builtConfig: CosmographConfig | undefined;   // the config the constructor used
+  const ready = $derived(!!config);                // boolean: flips false->true once
 
+  // Create the instance ONCE. Must NOT read `instance` here: writing it below
+  // would re-trigger this effect -> destroy/recreate loop (blank canvas).
   $effect(() => {
-    if (!el || !config) return;
-    let alive = true;
-    let instance: Cosmograph | undefined;
-    (async () => {
-      instance = new Cosmograph(el, config);
-      await instance.dataUploaded();
-      if (!alive) { void instance.destroy?.(); return; }
-      instance.fitView(0);
-      cosmo = instance;
-    })();
+    if (!el || !ready) return;
+    const cfg = untrack(() => config)!;
+    const inst = new Cosmograph(el, cfg);
+    builtConfig = cfg;
+    instance = inst;
+    inst.dataUploaded().then(() => { if (instance === inst) { inst.fitView(0); cosmo = inst; } });
     return () => {
-      alive = false;
-      void instance?.destroy?.();
-      cosmo = undefined;
+      void inst.destroy?.();
+      if (instance === inst) { instance = undefined; cosmo = undefined; }
     };
+  });
+
+  // Recolor / swap data IN PLACE on later config changes — recreating the
+  // instance leaves a blank canvas and leaks WebGL contexts. Explore's config
+  // never changes (c === builtConfig), so it stays a pure create-once.
+  $effect(() => {
+    const c = config;
+    const inst = instance;
+    if (!inst || !c || c === builtConfig) return;
+    let alive = true;
+    inst.setConfig(c).then(() => { if (alive) inst.fitView(0); }).catch(() => { /* noop */ });
+    return () => { alive = false; };
   });
 </script>
 

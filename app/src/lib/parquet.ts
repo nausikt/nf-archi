@@ -18,6 +18,13 @@ async function tryLoad(url: string): Promise<Record<string, unknown>[] | null> {
   return parquetReadObjects({ file, compressors });   // snappy etc. handled by compressors
 }
 
+/** Fetch + parse a parquet file by URL; throws if the file is absent. */
+export async function loadParquet(url: string): Promise<Record<string, unknown>[]> {
+  const rows = await tryLoad(url);
+  if (!rows) throw new Error(`Parquet not found: ${url}`);
+  return rows;
+}
+
 /**
  * Load the sample points for the embedding view. Prefers the rich `points.parquet`
  * (x,y + consensus_label + top anchors); falls back to bare `umap2.parquet` (x,y)
