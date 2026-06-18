@@ -19,8 +19,8 @@ cluster:
 
 representatives:
   n_medoid: 2
-  n_boundary: 3     # the ambiguous review queue — usually want more
-  n_outlier: 2
+  n_boundary: 2     # the ambiguous review queue — usually want more
+  n_outlier: 1
 
 argilla:
   enabled: true

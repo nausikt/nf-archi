@@ -20,8 +20,9 @@
         "external_source": {
             "type": "string",
             "description": "Which system this record originated from",
-            "enum": ["discourse", "mattermost"]
+            "enum": ["discourse", "mattermost", "twiki"]
         }
     },
-    "required": []
+    "required": [],
+    "unevaluatedProperties": false
 }

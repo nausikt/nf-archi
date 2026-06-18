@@ -69,3 +69,52 @@ export async function loadAnchorPoints(base = './data'): Promise<AnchorPointRow[
   const rows = await tryLoad(`${base}/anchor_points.parquet`);
   return (rows ?? []) as AnchorPointRow[];
 }
+
+/** Summary written by the Argilla export step (results/bootstrapping/argilla_export.json). */
+export interface ArgillaSummary {
+  url?: string;            // {api_url}/dataset/{id}/annotation-mode
+  dataset_name?: string;
+  workspace?: string;
+  [k: string]: unknown;
+}
+
+/** Load the Argilla export summary if the export ran; null otherwise. */
+export async function loadArgillaSummary(base = './data'): Promise<ArgillaSummary | null> {
+  const res = await fetch(`${base}/argilla_export.json`);
+  if (!res.ok) return null;
+  try {
+    return (await res.json()) as ArgillaSummary;
+  } catch {
+    return null;
+  }
+}
+
+/** The human-facing text for a sample: question (title) + link back to source. */
+export interface DatasetText {
+  question?: string;
+  external_url?: string;
+}
+
+/**
+ * Load `dataset.jsonl` (the canonical per-sample text) as sample_id -> {question,
+ * external_url}, for point hover labels and click-through. Empty map if absent.
+ */
+export async function loadDataset(base = './data'): Promise<Map<string, DatasetText>> {
+  const map = new Map<string, DatasetText>();
+  const res = await fetch(`${base}/dataset.jsonl`);
+  if (!res.ok) return map;
+  for (const line of (await res.text()).split('\n')) {
+    const t = line.trim();
+    if (!t) continue;
+    try {
+      const o = JSON.parse(t) as Record<string, unknown>;
+      if (o.sample_id != null) {
+        map.set(String(o.sample_id), {
+          question: o.question != null ? String(o.question) : undefined,
+          external_url: o.external_url != null ? String(o.external_url) : undefined,
+        });
+      }
+    } catch { /* skip malformed line */ }
+  }
+  return map;
+}

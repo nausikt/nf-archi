@@ -55,8 +55,10 @@
   });
 </script>
 
+<!-- nopan/nodrag/nowheel: let Cosmograph own pan/zoom/click on the canvas instead
+     of Svelte Flow's pane (without nopan the pane eats the mousedown -> no click). -->
 <div class="canvas-root">
-  <div class="cosmo nodrag nowheel" bind:this={el}></div>
+  <div class="cosmo nodrag nopan nowheel" bind:this={el}></div>
   {@render children?.()}
 </div>
 

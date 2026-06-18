@@ -4,6 +4,7 @@
   import CosmographNode from './lib/CosmographNode.svelte';
   import DagNode from './lib/dag/DagNode.svelte';
   import { loadDag } from './lib/dag/loadDag';
+  import CommandPaletteHost from './lib/commandPalette/CommandPaletteHost.svelte';
 
   const nodeTypes: NodeTypes = { cosmograph: CosmographNode, dag: DagNode };
 
@@ -58,6 +59,7 @@
   <SvelteFlow bind:nodes bind:edges {nodeTypes} colorMode="dark" fitView>
     <Background />
     <Controls />
+    <CommandPaletteHost />
   </SvelteFlow>
 </div>
 

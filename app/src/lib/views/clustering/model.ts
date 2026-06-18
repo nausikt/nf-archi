@@ -11,7 +11,8 @@
  * partition. Loading is "as-is": files are read straight from ./data.
  */
 import type { CosmographConfig } from '@cosmograph/cosmograph';
-import { loadParquet } from '../../parquet';
+import { loadParquet, loadDataset } from '../../parquet';
+import { pointTitle, openUrlOnClick } from '../pointText';
 
 const MANIFEST = './data/member_weights.json';
 const VIZ = './data/umap2.parquet';
@@ -41,7 +42,10 @@ export interface Member {
   dropped: boolean;
 }
 
-export interface BasePoint { sample_id: string; x: number; y: number; index: number; }
+export interface BasePoint {
+  sample_id: string; x: number; y: number; index: number;
+  question?: string; external_url?: string;
+}
 
 export interface ClusterBin { label: number; color: string; count: number; }
 
@@ -104,13 +108,19 @@ export async function loadMembers(): Promise<Member[]> {
 
 /** Load the fixed 2D viz coordinates that every member is rendered onto. */
 export async function loadBasePoints(): Promise<BasePoint[]> {
-  const rows = await loadParquet(VIZ);
-  return rows.map((r, index) => ({
-    sample_id: String(r.sample_id),
-    x: Number(r.x),
-    y: Number(r.y),
-    index,
-  }));
+  const [rows, textMap] = await Promise.all([loadParquet(VIZ), loadDataset()]);
+  return rows.map((r, index) => {
+    const sample_id = String(r.sample_id);
+    const text = textMap.get(sample_id);
+    return {
+      sample_id,
+      x: Number(r.x),
+      y: Number(r.y),
+      index,
+      question: text?.question,
+      external_url: text?.external_url,
+    };
+  });
 }
 
 /** Load a single member's per-sample cluster labels. */
@@ -135,8 +145,16 @@ export function buildRunView(base: BasePoint[], labels: Map<string, number>): Ru
 
   const points = base.map((p) => {
     const l = labels.get(p.sample_id) ?? -1;
-    return { sample_id: p.sample_id, index: p.index, x: p.x, y: p.y, cluster: String(l), is_noise: l < 0 ? 1 : 0 };
+    return {
+      sample_id: p.sample_id, index: p.index, x: p.x, y: p.y,
+      cluster: String(l), is_noise: l < 0 ? 1 : 0,
+      label: p.question ?? '', external_url: p.external_url ?? '',
+    };
   });
+
+  // index -> source URL for click-through
+  const urlByIndex = new Map<number, string>();
+  for (const p of base) if (p.external_url) urlByIndex.set(p.index, p.external_url);
 
   const config: CosmographConfig = {
     points,
@@ -155,6 +173,15 @@ export function buildRunView(base: BasePoint[], labels: Map<string, number>): Ru
     pointColorByMap: colorByMap,
     pointSizeBy: 'is_noise',
     pointSizeByFn: (v: unknown) => (Number(v) ? 4 : 7),   // noise smaller
+    pointLabelBy: 'label',
+    pointLabelFn: pointTitle,                             // first line, truncated
+    showLabels: true,
+    showDynamicLabels: false,
+    showTopLabels: false,
+    showLabelsFor: [],                                    // no persistent labels; hover only
+    showHoveredPointLabel: true,                          // hover -> question title
+    pointLabelFontSize: 12,
+    onPointClick: openUrlOnClick(urlByIndex),            // click -> open external_url
     pointIncludeColumns: ['*'],
   };
 
