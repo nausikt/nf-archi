@@ -77,9 +77,9 @@ export async function buildSampledModel(): Promise<SampledModel> {
     if (!st || !pos) continue;
     roleCounts[role]++;
     const t = textMap.get(String(r.sample_id));
-    // representatives are the Argilla review items -> click opens the Argilla record
-    // (search by question); fall back to the original source if no export ran.
-    const target = argillaRecordUrl(argilla?.url, t?.question) ?? t?.external_url;
+    // representatives are the Argilla review items -> click opens the exact Argilla
+    // record (metadata=sample_id filter); fall back to the source if no export ran.
+    const target = argillaRecordUrl(argilla?.url, String(r.sample_id)) ?? t?.external_url;
     repPoints.push({
       sample_id: `rep:${role}:${r.sample_id}:${r.rank ?? roleCounts[role]}`, index: index++,
       x: pos.x, y: pos.y,
