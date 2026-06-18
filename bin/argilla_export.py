@@ -106,7 +106,14 @@ def build_records(args):
     sample_ids = list(roles.keys()) if args.scope == "representatives" else list(dataset.keys())
 
     # ---- settings spec (questions only for kinds that actually have anchors) ----
-    questions = []
+    # rep_role sits first so it appears at the top of the annotation panel.
+    questions = [{
+        "name": "rep_role",
+        "kind": "_rep_role",
+        "multi": False,
+        "labels": list(ROLE_PRIORITY.keys()),
+        "required": False,
+    }]
     for kind, qname in KIND_QUESTION.items():
         labels = label_by_kind.get(kind)
         if labels:
@@ -118,9 +125,12 @@ def build_records(args):
                 "required": False,
             })
     # Argilla refuses to publish a dataset with no required question; make the
-    # first available one (category if present) mandatory for the reviewer.
-    if questions:
-        questions[0]["required"] = True
+    # first anchor-derived question (category if present) mandatory — rep_role
+    # is informational so we skip it when picking the required one.
+    anchor_questions = [q for q in questions if q["kind"] != "_rep_role"]
+    if anchor_questions:
+        anchor_questions[0]["required"] = True
+
     settings_spec = {"fields": ["question", "answer"], "questions": questions}
 
     # ---- record specs ----
@@ -157,10 +167,21 @@ def build_records(args):
                 value, score = picks[0]
             record_sugg.append({"question": q["name"], "value": value, "score": score})
 
+        # source link appended to the question field so it stays co-located
+        # with the content and keeps the left panel uncluttered.
+        ext_url = row.get("external_url")
+        source_suffix = f"\n\n[View source ↗]({ext_url})" if ext_url else ""
+        question_text = str(row.get("question") or "") + source_suffix
+
+        # rep_role suggestion: pre-fill with the primary role so the reviewer
+        # sees it on the right panel and can confirm / override it.
+        if primary:
+            record_sugg.append({"question": "rep_role", "value": primary, "score": None})
+
         records.append({
             "id": sid,
             "fields": {
-                "question": str(row.get("question") or ""),
+                "question": question_text,
                 "answer": str(row.get("answer") or ""),
             },
             "metadata": {k: v for k, v in metadata.items() if v is not None},
@@ -179,9 +200,15 @@ def to_argilla_settings(settings_spec, guidelines):
     ]
     questions = []
     for q in settings_spec["questions"]:
-        cls = rg.MultiLabelQuestion if q["multi"] else rg.LabelQuestion
-        questions.append(cls(name=q["name"], title=q["name"].capitalize(),
-                             labels=q["labels"], required=q.get("required", False)))
+        if q["kind"] == "_rep_role":
+            questions.append(rg.LabelQuestion(
+                name="rep_role", title="Representative role",
+                labels=q["labels"], required=False,
+            ))
+        else:
+            cls = rg.MultiLabelQuestion if q["multi"] else rg.LabelQuestion
+            questions.append(cls(name=q["name"], title=q["name"].capitalize(),
+                                 labels=q["labels"], required=q.get("required", False)))
     questions.append(rg.TextQuestion(name="note", title="Reviewer note", required=False))
 
     metadata = [

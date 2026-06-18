@@ -33,7 +33,7 @@ workflow BootstrappingDataset {
     // }
 
     CollectDataset(LoadQueries.out.records, params.outdir)
-    ch_dataset = CollectDataset.out.dataset.first()   // original text; reused by the Argilla export
+    ch_dataset = CollectDataset.out.dataset
 
     // Embed per input batch (one chunk per month) in parallel, capped at
     // params.embed.max_forks, then fold the shards back into one parquet. This
@@ -49,26 +49,26 @@ workflow BootstrappingDataset {
         tuple(chunk, "embeddings.${chunk.baseName}.parquet", params.embed.text_fields.join(',')) })
 
     MergeEmbeddings(Embed.out.embeddings.collect())
-    ch_embeddings = MergeEmbeddings.out.embeddings.first()   // raw space (anchor comparisons)
+    ch_embeddings = MergeEmbeddings.out.embeddings
 
     // PCA -> UMAP: clustering on the low-dim space fixes high-dim sparsity.
     // Gridable: each reduction variant x each clustering run = one ensemble
     // member; the primary variant supplies the geometry + viz (umap2) space.
     Reduction(MergeEmbeddings.out.embeddings)
-    ch_umap2 = Reduction.out.umap2.first()    // viz space (anchor/sample placement)
+    ch_umap2 = Reduction.out.umap2
 
     Clustering(Reduction.out.variants, Reduction.out.primary, params.cluster.runs)
-    ch_consensus = Clustering.out.consensus.first()
-    ch_reps      = Clustering.out.representatives.first()
+    ch_consensus = Clustering.out.consensus
+    ch_reps      = Clustering.out.representatives
 
     // Optional pre-labeling overlay: rank user-prior anchors against each
     // sample (and each consensus cluster) for the expert's first pass.
     if( params.anchors?.categories || params.anchors?.tags || params.anchors?.flags ) {
         Anchors(params.outdir)
-        ch_anchor_meta = Anchors.out.meta.first()
+        ch_anchor_meta = Anchors.out.meta
         AssignAnchors(
             ch_embeddings,
-            Anchors.out.anchors.first(),
+            Anchors.out.anchors,
             ch_anchor_meta,
             ch_consensus,
             ch_umap2

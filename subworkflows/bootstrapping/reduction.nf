@@ -27,19 +27,16 @@ workflow Reduction {
     runs.each { SchemaValidator.validate(it, 'schemas/reduce/run.json') }
     assert runs*.name.unique().size() == runs.size() : "Duplicate reduction names: ${runs*.name}"
 
-    ch_emb = embeddings.first()
-
     // each recipe -> a clustering-space variant (tuple: name, file)
-    Reduce(Channel.fromList(runs), ch_emb)
+    Reduce(Channel.fromList(runs), embeddings)
 
     // primary = first recipe: supplies the single viz space + representatives geometry
     def primarySpec = runs[0]
-    ReduceViz(primarySpec, ch_emb)
+    ReduceViz(primarySpec, embeddings)
 
     ch_primary = Reduce.out.reduced
         .filter { name, _f -> name == primarySpec.name }
         .map    { _name, f -> f }
-        .first()
 
     emit:
     variants = Reduce.out.reduced     // tuple(name, reduced_file) — one or many
