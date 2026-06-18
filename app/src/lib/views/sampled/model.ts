@@ -7,7 +7,8 @@
  * colour, plus the tag/flag anchors (`anchor_points.parquet`). All "as-is".
  */
 import type { CosmographConfig } from '@cosmograph/cosmograph';
-import { loadPoints, loadAnchorPoints, loadParquet } from '../../parquet';
+import { loadPoints, loadAnchorPoints, loadParquet, loadDataset, loadArgillaSummary } from '../../parquet';
+import { pointTitle, openUrlOnClick, argillaRecordUrl } from '../pointText';
 
 export type Role = 'medoid' | 'boundary' | 'outlier';
 export type AnchorKind = 'tag' | 'flag';
@@ -37,14 +38,16 @@ export interface SampledModel {
 
 type CPoint = {
   sample_id: string; index: number; x: number; y: number;
-  kind: string; shape: number; size: number; label: string;
+  kind: string; shape: number; size: number; label: string; external_url?: string;
 };
 
 export async function buildSampledModel(): Promise<SampledModel> {
-  const [pts, anchors, reps] = await Promise.all([
+  const [pts, anchors, reps, textMap, argilla] = await Promise.all([
     loadPoints(),
     loadAnchorPoints(),
     loadParquet('./data/representatives.parquet').catch(() => [] as Record<string, unknown>[]),
+    loadDataset(),
+    loadArgillaSummary(),
   ]);
 
   const xy = new Map<string, { x: number; y: number }>();
@@ -53,11 +56,15 @@ export async function buildSampledModel(): Promise<SampledModel> {
   let index = 0;
 
   // base samples: dim circles for context
-  const samplePoints: CPoint[] = pts.map((p) => ({
-    sample_id: String(p.sample_id), index: index++,
-    x: Number(p.x), y: Number(p.y),
-    kind: 'sample', shape: 0, size: 5, label: '',
-  }));
+  const samplePoints: CPoint[] = pts.map((p) => {
+    const t = textMap.get(String(p.sample_id));
+    return {
+      sample_id: String(p.sample_id), index: index++,
+      x: Number(p.x), y: Number(p.y),
+      kind: 'sample', shape: 0, size: 5,
+      label: t?.question ?? '', external_url: t?.external_url,
+    };
+  });
 
   // representative markers: distinct shape + colour per role, placed on the same xy
   const roleStyle = new Map(ROLE_STYLES.map((s) => [s.role, s]));
@@ -69,10 +76,15 @@ export async function buildSampledModel(): Promise<SampledModel> {
     const pos = xy.get(String(r.sample_id));
     if (!st || !pos) continue;
     roleCounts[role]++;
+    const t = textMap.get(String(r.sample_id));
+    // representatives are the Argilla review items -> click opens the Argilla record
+    // (search by question); fall back to the original source if no export ran.
+    const target = argillaRecordUrl(argilla?.url, t?.question) ?? t?.external_url;
     repPoints.push({
       sample_id: `rep:${role}:${r.sample_id}:${r.rank ?? roleCounts[role]}`, index: index++,
       x: pos.x, y: pos.y,
-      kind: role, shape: st.shapeNum, size: 13, label: '',
+      kind: role, shape: st.shapeNum, size: 13,
+      label: t?.question ?? '', external_url: target,
     });
   }
 
@@ -101,6 +113,12 @@ export async function buildSampledModel(): Promise<SampledModel> {
     ...Object.fromEntries(ANCHOR_STYLES.map((s) => [s.kind, s.color])),
   };
 
+  // index -> source URL for click-through (samples + representatives)
+  const urlByIndex = new Map<number, string>();
+  for (const p of [...samplePoints, ...repPoints]) {
+    if (p.external_url) urlByIndex.set(p.index, p.external_url);
+  }
+
   const config: CosmographConfig = {
     points: [...samplePoints, ...repPoints, ...anchorPoints],
     pointIdBy: 'sample_id',
@@ -118,11 +136,14 @@ export async function buildSampledModel(): Promise<SampledModel> {
     pointSizeBy: 'size',
     pointSizeByFn: (v: unknown) => Number(v) || 5,
     pointLabelBy: 'label',
+    pointLabelFn: pointTitle,           // first line, truncated
     showLabels: true,
     showDynamicLabels: false,
     showTopLabels: false,
     showLabelsFor: anchorIds,           // persistent anchor names only
+    showHoveredPointLabel: true,        // hover -> question title
     pointLabelFontSize: 12,
+    onPointClick: openUrlOnClick(urlByIndex),   // click -> open external_url
     pointIncludeColumns: ['*'],
   };
 

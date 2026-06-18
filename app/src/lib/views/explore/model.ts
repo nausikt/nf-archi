@@ -8,8 +8,9 @@
  */
 import type { CosmographConfig } from '@cosmograph/cosmograph';
 import {
-  loadPoints, loadPrelabels, loadAnchorPoints, type PrelabelRow,
+  loadPoints, loadPrelabels, loadAnchorPoints, loadDataset, type PrelabelRow,
 } from '../../parquet';
+import { pointTitle, openUrlOnClick } from '../pointText';
 
 /** Enriched sample point: points.parquet row + many-to-many arrays + index. */
 export type Pt = {
@@ -49,8 +50,8 @@ function arraysByKind(pre: PrelabelRow[], kind: string): Map<string, string[]> {
 }
 
 export async function buildExploreModel(): Promise<ExploreModel> {
-  const [data, pre, anchorRows] = await Promise.all([
-    loadPoints(), loadPrelabels(), loadAnchorPoints(),
+  const [data, pre, anchorRows, textMap] = await Promise.all([
+    loadPoints(), loadPrelabels(), loadAnchorPoints(), loadDataset(),
   ]);
 
   const tagMap = arraysByKind(pre, 'tag');
@@ -85,14 +86,18 @@ export async function buildExploreModel(): Promise<ExploreModel> {
   // Cosmograph can't ingest array-valued columns from plain objects, so feed it
   // scalars only; many-to-many search works via substring over the joined strings.
   // samples = circle (shape 0); anchors = cross (shape 7) with a persistent label.
-  const samplePoints = pts.map(({ tags, flags, ...rest }) => ({
-    ...rest,
-    tags_all: tags.join(', '),
-    flags_all: flags.join(', '),
-    is_anchor: 0,
-    shape: 0,
-    label: '',
-  }));
+  const samplePoints = pts.map(({ tags, flags, ...rest }) => {
+    const text = textMap.get(String(rest.sample_id));
+    return {
+      ...rest,
+      tags_all: tags.join(', '),
+      flags_all: flags.join(', '),
+      is_anchor: 0,
+      shape: 0,
+      label: text?.question ?? '',           // hover -> question title
+      external_url: text?.external_url ?? '', // click -> open source
+    };
+  });
   // anchors must share the exact sample schema or DuckDB rejects the table
   const blank = Object.fromEntries(
     Object.keys(samplePoints[0] ?? {}).map((k) => [k, null]),
@@ -110,6 +115,13 @@ export async function buildExploreModel(): Promise<ExploreModel> {
   }));
   const cosmoPoints = [...samplePoints, ...anchorPoints];
   const anchorIds = anchorPoints.map((a) => a.sample_id);
+
+  // index -> source URL for click-through (samples with an external_url only)
+  const urlByIndex = new Map<number, string>();
+  for (const p of cosmoPoints) {
+    const url = (p as { external_url?: unknown }).external_url;
+    if (url) urlByIndex.set(Number(p.index), String(url));
+  }
 
   const config: CosmographConfig = {
     points: cosmoPoints,
@@ -131,11 +143,14 @@ export async function buildExploreModel(): Promise<ExploreModel> {
     pointSizeBy: 'is_anchor',
     pointSizeByFn: (v: unknown) => (Number(v) ? 13 : 6),  // anchors larger
     pointLabelBy: 'label',
+    pointLabelFn: pointTitle,                            // first line, truncated
     showLabels: true,
     showDynamicLabels: false,
     showTopLabels: false,
     showLabelsFor: anchorIds,                            // persistent anchor names only
+    showHoveredPointLabel: true,                         // hover -> question title
     pointLabelFontSize: 12,
+    onPointClick: openUrlOnClick(urlByIndex),            // click -> open external_url
     pointIncludeColumns: ['*'],
   };
 
