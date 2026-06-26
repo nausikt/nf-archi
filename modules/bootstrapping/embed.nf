@@ -3,6 +3,9 @@ process Embed {
 
     tag "${out_name}"
 
+    errorStrategy 'retry'
+    maxRetries 3
+
     // cap concurrent inferencing so the endpoint stays trackable / unsaturated
     maxForks params.embed.max_forks
 

@@ -185,3 +185,9 @@ anchors:
     - id: likely_user_code_issue
       name: "Likely user code issue"
       definition: "Symptom suggests user analysis code is at fault, not CMS infrastructure."
+
+    - id: partially_available_dataset
+      name: "Partially Available dataset"
+      definition: "Input dataset, some blocks are not on disk."
+
+
